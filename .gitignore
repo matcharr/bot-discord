@@ -65,6 +65,7 @@ logs/
 warnings.json
 data/
 temp/
+config.json
 
 # Docker
 .dockerignore
