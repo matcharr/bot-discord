@@ -4,9 +4,9 @@ A comprehensive Discord bot with moderation tools, anti-raid protection, and ser
 
 ## Quick Start
 
-1. Install dependencies: `pip install discord.py`
-2. Create a "logs" channel in your Discord server
-3. Update `channel_id` in `reporting.py` with your report channel ID
+1. Install dependencies: `pip install discord.py python-dotenv`
+2. Copy `.env.example` to `.env` and fill in your bot token and report channel ID
+3. Create a "logs" channel in your Discord server
 4. Load all cogs in your main bot file
 
 ## Features & Commands
@@ -47,10 +47,13 @@ Automatically detects and kicks spammers (10+ messages triggers kick, 10-second 
 
 ## Setup Checklist
 
-1. Create `#logs` channel for event logging
-2. Create report channel and update ID in `reporting.py` line 16
-3. Ensure bot role is above roles it needs to manage
-4. Test with `/warn @user test` to verify warnings.json creation
+1. Copy `.env.example` to `.env` and configure:
+   - `BOT_TOKEN=your_bot_token`
+   - `REPORT_CHANNEL_ID=your_channel_id`
+2. Create `#logs` channel for event logging
+3. Create report channel for user reports
+4. Ensure bot role is above roles it needs to manage
+5. Test with `/warn @user test` to verify warnings.json creation
 
 ## File Structure
 ```
