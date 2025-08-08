@@ -5,6 +5,12 @@ from discord.ext import commands
 class InviteManagement(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.invites = {}
+
+    @commands.Cog.listener()
+    async def on_ready(self):
+        for guild in self.bot.guilds:
+            self.invites[guild.id] = await guild.invites()
 
     @commands.Cog.listener()
     async def on_invite_create(self, invite):

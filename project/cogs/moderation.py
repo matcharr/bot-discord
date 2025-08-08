@@ -24,7 +24,7 @@ class Moderation(commands.Cog):
             self.warnings[str(member.id)] = []
         self.warnings[str(member.id)].append(reason)
 
-        with open('warning.json', 'w') as file:
+        with open('warnings.json', 'w') as file:
             json.dump(self.warnings, file)
         await ctx.send(f'{member} has been warned for {reason}')
         await self.log(ctx.guild, "Warning", member, reason)
