@@ -1,13 +1,31 @@
 # Discord Moderation Bot
 
+[![CI](https://github.com/matcharr/bot-discord/workflows/CI/badge.svg)](https://github.com/matcharr/bot-discord/actions)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Discord.py](https://img.shields.io/badge/discord.py-2.3.1-blue.svg)](https://discordpy.readthedocs.io/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 A comprehensive Discord bot with moderation tools, anti-raid protection, and server management features.
 
 ## Quick Start
 
-1. Install dependencies: `pip install discord.py python-dotenv`
+1. Install dependencies: `pip install -r project/requirements.txt`
 2. Copy `.env.example` to `.env` and fill in your bot token and report channel ID
 3. Create a "logs" channel in your Discord server
 4. Load all cogs in your main bot file
+
+## Development Setup
+
+```bash
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Setup pre-commit hooks
+make install
+
+# Format and lint code
+make check
+```
 
 ## Features & Commands
 
@@ -74,4 +92,17 @@ cogs = ['anti_raid', 'moderation', 'logging_system',
 
 for cog in cogs:
     await bot.load_extension(f'cogs.{cog}')
+```
+
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and commit message standards.
+
+## Project Structure
+```
+├── project/cogs/          # Bot functionality modules
+├── .env.example          # Environment configuration template
+├── TODO.md              # Future enhancements
+├── CONTRIBUTING.md      # Development guidelines
+└── .gitmessage         # Commit message template
 ```

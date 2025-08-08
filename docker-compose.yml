@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  discord-bot:
+    build: .
+    container_name: discord-moderation-bot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - REPORT_CHANNEL_ID=${REPORT_CHANNEL_ID}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - bot-network
+
+  # Optional: Database for future enhancements
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: bot-database
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: discord_bot
+  #     POSTGRES_USER: bot_user
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - bot-network
+
+networks:
+  bot-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
