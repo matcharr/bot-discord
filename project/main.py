@@ -5,13 +5,13 @@ A comprehensive Discord bot with moderation tools and anti-raid protection.
 """
 
 import asyncio
-import discord
-from discord.ext import commands
 
-from config import config
-from utils.logger import setup_logger
-from utils.health import HealthChecker
+import discord
 import utils.health as health_module
+from config import config
+from discord.ext import commands
+from utils.health import HealthChecker
+from utils.logger import setup_logger
 
 # Setup logging
 logger = setup_logger()
@@ -28,7 +28,7 @@ bot = commands.Bot(
     command_prefix=config.command_prefix,
     case_insensitive=config.case_insensitive,
     intents=intents,
-    help_command=None  # We'll create a custom one
+    help_command=None,  # We'll create a custom one
 )
 
 
@@ -36,19 +36,18 @@ bot = commands.Bot(
 async def on_ready():
     """Bot startup event."""
     global health_checker
-    
+
     logger.info(f"{bot.user} has connected to Discord!")
     logger.info(f"Bot is in {len(bot.guilds)} guilds")
-    
+
     # Initialize health checker
     health_checker = HealthChecker(bot)
     health_module.health_checker = health_checker
-    
+
     # Set bot status
     await bot.change_presence(
         activity=discord.Activity(
-            type=discord.ActivityType.watching,
-            name="for rule violations"
+            type=discord.ActivityType.watching, name="for rule violations"
         )
     )
 
@@ -65,41 +64,41 @@ async def on_command_error(ctx, error):
     """Global error handler."""
     if isinstance(error, commands.CommandNotFound):
         return  # Ignore unknown commands
-    
+
     if isinstance(error, commands.MissingPermissions):
         await ctx.send("❌ You don't have permission to use this command.")
         return
-    
+
     if isinstance(error, commands.BotMissingPermissions):
         await ctx.send("❌ I don't have the required permissions for this command.")
         return
-    
+
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send(f"⏰ Command on cooldown. Try again in {error.retry_after:.1f}s")
         return
-    
+
     # Log unexpected errors
     error_msg = f"Unexpected error in command {ctx.command}: {error}"
     logger.error(error_msg)
-    
+
     if health_checker:
         health_checker.record_error(error_msg)
-    
+
     await ctx.send("❌ An unexpected error occurred. Please try again later.")
 
 
 async def load_cogs():
     """Load all bot cogs."""
     cogs = [
-        'cogs.anti_raid',
-        'cogs.moderation', 
-        'cogs.logging_system',
-        'cogs.role_management',
-        'cogs.invite_management',
-        'cogs.reporting',
-        'cogs.admin'
+        "cogs.anti_raid",
+        "cogs.moderation",
+        "cogs.logging_system",
+        "cogs.role_management",
+        "cogs.invite_management",
+        "cogs.reporting",
+        "cogs.admin",
     ]
-    
+
     for cog in cogs:
         try:
             await bot.load_extension(cog)
