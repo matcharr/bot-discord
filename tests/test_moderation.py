@@ -22,6 +22,9 @@ class TestModeration:
         assert Moderation.parse_time("0m") is None
         assert Moderation.parse_time("-5m") is None
         assert Moderation.parse_time("999d") is None  # Too long
+        assert Moderation.parse_time(None) is None
+        assert Moderation.parse_time("5") is None     # No unit
+        assert Moderation.parse_time("5x") is None    # Invalid unit
     
     def test_parse_time_edge_cases(self):
         """Test parse_time edge cases."""
