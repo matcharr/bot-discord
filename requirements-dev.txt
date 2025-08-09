@@ -2,8 +2,8 @@
 black==24.8.0
 isort==5.13.2
 flake8==7.1.1
-mypy==1.11.2
-pre-commit==3.8.0
+mypy==1.8.0
+pre-commit==3.5.0
 
 # Testing (for future)
 pytest==8.3.4
