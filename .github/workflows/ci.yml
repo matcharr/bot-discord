@@ -11,7 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11"]
+        python-version: ["3.11", "3.12"]
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      REPORT_CHANNEL_ID: ${{ secrets.REPORT_CHANNEL_ID }}
+      COMMAND_PREFIX: ${{ vars.COMMAND_PREFIX }}
+      CASE_INSENSITIVE: ${{ vars.CASE_INSENSITIVE }}
+      MAX_WARNINGS_BEFORE_ACTION: ${{ vars.MAX_WARNINGS_BEFORE_ACTION }}
+      ENABLE_AUDIT_LOGGING: ${{ vars.ENABLE_AUDIT_LOGGING }}
 
     steps:
     - uses: actions/checkout@v4

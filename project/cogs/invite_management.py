@@ -1,6 +1,7 @@
-import discord
-from discord.ext import commands
 import logging
+
+
+from discord.ext import commands
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +19,12 @@ class InviteManagement(commands.Cog):
     @commands.Cog.listener()
     async def on_invite_create(self, invite):
         # Notify in console or log file
-        logger.info(f'Invite created: {invite.url}')
+        logger.info(f"Invite created: {invite.url}")
 
     @commands.Cog.listener()
     async def on_invite_delete(self, invite):
         # Notify in console or log file
-        logger.info(f'Invite deleted: {invite.url}')
+        logger.info(f"Invite deleted: {invite.url}")
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -35,11 +36,13 @@ class InviteManagement(commands.Cog):
             invites_after_join = await member.guild.invites()
             self.invites[member.guild.id] = invites_after_join
             used_invite = next(
-                invite for invite in invites_before_join if invite not in invites_after_join
+                invite
+                for invite in invites_before_join
+                if invite not in invites_after_join
             )
 
             # Here, you can store `used_invite` data somewhere or do something with it
-            logger.info(f'{member.name} used invite {used_invite.url}')
+            logger.info(f"{member.name} used invite {used_invite.url}")
 
         except Exception as e:
             logger.error(f"Error tracking invite usage: {e}")
