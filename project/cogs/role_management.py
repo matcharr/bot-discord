@@ -5,7 +5,7 @@ from discord.ext import commands
 class RoleManagement(commands.Cog):
     @commands.command(name='create_role')
     @commands.has_permissions(manage_roles=True)
-    async def create_role(self, ctx, name, color: discord.Color = discord.Colors.default()):
+    async def create_role(self, ctx, name, color: discord.Color = discord.Color.default()):
         role = await ctx.guild.create_role(name=name, color=color)
         await ctx.send(f'Role "{role.name}" has been created.')
 
