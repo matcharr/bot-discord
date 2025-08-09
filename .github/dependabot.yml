@@ -4,7 +4,10 @@ updates:
     directory: "/project"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3  # Reduce from 10
+    groups:
+      project-deps:
+        update-types: ["minor", "patch"]
     reviewers:
       - "matcharr"
     assignees:
@@ -18,7 +21,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 2  # Reduce from 5
+    groups:
+      root-deps:
+        update-types: ["minor", "patch"]
     target-branch: "main"
     commit-message:
       prefix: "chore"
