@@ -69,9 +69,9 @@ Automatically detects and kicks spammers (10+ messages triggers kick, 10-second 
    - `BOT_TOKEN=your_bot_token`
    - `REPORT_CHANNEL_ID=your_channel_id`
 2. Create `#logs` channel for event logging
-3. Create report channel for user reports
+3. Create report channel and add ID to `.env` file
 4. Ensure bot role is above roles it needs to manage
-5. Test with `/warn @user test` to verify warnings.json creation
+5. Test with `!warn @user test` to verify warnings.json creation
 
 ## File Structure
 ```

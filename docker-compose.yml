@@ -32,5 +32,6 @@ networks:
   bot-network:
     driver: bridge
 
-volumes:
-  postgres_data:
+# Uncomment when enabling PostgreSQL
+# volumes:
+#   postgres_data:

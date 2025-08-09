@@ -140,7 +140,7 @@ class Moderation(commands.Cog):
                 return amount * 60 * 60
             elif unit == 'd':
                 return amount * 60 * 60 * 24
-            return None
+        return None
 
     @staticmethod
     async def log(guild, action, user, reason):
