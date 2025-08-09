@@ -11,9 +11,24 @@ class Reporting(commands.Cog):
         self.bot = bot
 
     @commands.command()
+    @commands.cooldown(1, 300, commands.BucketType.user)  # 1 report per 5 minutes
     async def report(self, ctx, member: discord.Member, *, reason=None):
         if reason is None:
             await ctx.send("You need to specify a reason!")
+            return
+        
+        # Validate reason length and content
+        if len(reason) < 10:
+            await ctx.send("❌ Reason must be at least 10 characters long.")
+            return
+        
+        if len(reason) > 500:
+            await ctx.send("❌ Reason must be less than 500 characters.")
+            return
+        
+        # Prevent self-reporting
+        if member == ctx.author:
+            await ctx.send("❌ You cannot report yourself.")
             return
 
         # get the channel by its ID from environment variable
