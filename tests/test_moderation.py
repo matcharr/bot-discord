@@ -58,13 +58,36 @@ class TestModeration:
         with patch('cogs.moderation.Path') as mock_path, \
              patch('builtins.open', create=True) as mock_open, \
              patch('json.dump') as mock_json_dump, \
+             patch('json.load') as mock_json_load, \
              patch('cogs.moderation.validate_hierarchy'), \
              patch('cogs.moderation.log_moderation_action'):
             
             mock_path.return_value.mkdir.return_value = None
             mock_path.return_value.exists.return_value = False
+            mock_json_load.return_value = {}  # Return empty dict for warnings
             
             mod = Moderation(mock_bot)
             result = mod._save_warnings()
             
             assert result is True
+    
+    @patch('cogs.moderation.config')
+    def test_load_warnings_file_exists(self, mock_config):
+        """Test loading warnings when file exists with valid data."""
+        mock_bot = MagicMock()
+        mock_config.max_warnings_before_action = 5
+        
+        test_warnings = {"123": ["reason1", "reason2"]}
+        
+        with patch('cogs.moderation.Path') as mock_path, \
+             patch('builtins.open', create=True) as mock_open, \
+             patch('json.load') as mock_json_load, \
+             patch('cogs.moderation.validate_hierarchy'), \
+             patch('cogs.moderation.log_moderation_action'):
+            
+            mock_path.return_value.mkdir.return_value = None
+            mock_path.return_value.exists.return_value = True
+            mock_json_load.return_value = test_warnings
+            
+            mod = Moderation(mock_bot)
+            assert mod.warnings == test_warnings
