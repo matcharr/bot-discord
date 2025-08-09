@@ -10,9 +10,14 @@ from discord.ext import commands
 
 from config import config
 from utils.logger import setup_logger
+from utils.health import HealthChecker
+import utils.health as health_module
 
 # Setup logging
 logger = setup_logger()
+
+# Initialize health checker
+health_checker = None
 
 # Bot setup
 intents = discord.Intents.default()
@@ -30,8 +35,14 @@ bot = commands.Bot(
 @bot.event
 async def on_ready():
     """Bot startup event."""
+    global health_checker
+    
     logger.info(f"{bot.user} has connected to Discord!")
     logger.info(f"Bot is in {len(bot.guilds)} guilds")
+    
+    # Initialize health checker
+    health_checker = HealthChecker(bot)
+    health_module.health_checker = health_checker
     
     # Set bot status
     await bot.change_presence(
@@ -40,6 +51,13 @@ async def on_ready():
             name="for rule violations"
         )
     )
+
+
+@bot.event
+async def on_command(ctx):
+    """Track command usage."""
+    if health_checker:
+        health_checker.record_command()
 
 
 @bot.event
@@ -61,7 +79,12 @@ async def on_command_error(ctx, error):
         return
     
     # Log unexpected errors
-    logger.error(f"Unexpected error in command {ctx.command}: {error}")
+    error_msg = f"Unexpected error in command {ctx.command}: {error}"
+    logger.error(error_msg)
+    
+    if health_checker:
+        health_checker.record_error(error_msg)
+    
     await ctx.send("❌ An unexpected error occurred. Please try again later.")
 
 
@@ -73,7 +96,8 @@ async def load_cogs():
         'cogs.logging_system',
         'cogs.role_management',
         'cogs.invite_management',
-        'cogs.reporting'
+        'cogs.reporting',
+        'cogs.admin'
     ]
     
     for cog in cogs:
@@ -82,6 +106,8 @@ async def load_cogs():
             logger.info(f"Loaded cog: {cog}")
         except Exception as e:
             logger.error(f"Failed to load cog {cog}: {e}")
+            if health_checker:
+                health_checker.record_error(f"Failed to load cog {cog}: {e}")
 
 
 async def main():

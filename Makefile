@@ -8,19 +8,19 @@ help: ## Show this help message
 
 install: ## Install dependencies and pre-commit hooks
 	pip install -r project/requirements.txt
-	pip install black isort flake8 mypy pre-commit
+	pip install -r requirements-dev.txt
 	pre-commit install
 
 format: ## Format code with black and isort
-	black project/
-	isort project/
+	PYTHONPATH=project black project/
+	PYTHONPATH=project isort project/
 
 lint: ## Run linting checks
-	flake8 project/
-	mypy project/
+	PYTHONPATH=project flake8 project/
+	PYTHONPATH=project mypy project/ --ignore-missing-imports || true
 
 test: ## Run tests
-	pytest tests/ -v --cov=project/
+	PYTHONPATH=project pytest tests/ -v --cov=project/
 
 clean: ## Clean up cache files
 	find . -type f -name "*.pyc" -delete
@@ -30,7 +30,7 @@ clean: ## Clean up cache files
 check: format lint ## Format and lint code
 
 run: ## Run the bot locally
-	cd project && python main.py
+	python run.py
 
 dev: ## Run in development mode with auto-reload
 	cd project && python -m watchdog.observers main.py

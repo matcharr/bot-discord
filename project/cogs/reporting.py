@@ -1,9 +1,11 @@
 from discord.ext import commands
 import discord
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 
 class Reporting(commands.Cog):
@@ -54,7 +56,7 @@ class Reporting(commands.Cog):
             await ctx.send("❌ I don't have permission to send messages to the report channel.")
         except Exception as e:
             await ctx.send("❌ Failed to send report. Please try again later.")
-            print(f"Report error: {e}")
+            logger.error(f"Report error: {e}")
 
 
 async def setup(bot):

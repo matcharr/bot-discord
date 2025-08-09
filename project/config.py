@@ -26,6 +26,10 @@ class BotConfig:
     # Logging
     log_level: str = "INFO"
     
+    # Moderation settings
+    max_warnings_before_action: int = 5
+    enable_audit_logging: bool = True
+    
     @classmethod
     def from_env(cls) -> "BotConfig":
         """Create config from environment variables."""
@@ -46,6 +50,8 @@ class BotConfig:
             kick_threshold=int(os.getenv("KICK_THRESHOLD", "10")),
             cooldown_seconds=int(os.getenv("COOLDOWN_SECONDS", "10")),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
+            max_warnings_before_action=int(os.getenv("MAX_WARNINGS_BEFORE_ACTION", "5")),
+            enable_audit_logging=os.getenv("ENABLE_AUDIT_LOGGING", "true").lower() == "true",
         )
 
 

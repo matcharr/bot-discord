@@ -1,7 +1,8 @@
 import os
 import pytest
 from unittest.mock import patch
-from project.config import BotConfig
+
+from config import BotConfig
 
 
 class TestBotConfig:

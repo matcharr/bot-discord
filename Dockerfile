@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY project/ ./project/
+COPY run.py ./
 COPY .env.example .env
 
 # Create non-root user
@@ -24,4 +25,4 @@ USER app
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import asyncio; print('Bot is healthy')" || exit 1
 
-CMD ["python", "-m", "project.main"]
+CMD ["python", "run.py"]
