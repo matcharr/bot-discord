@@ -36,11 +36,11 @@ class TestModeration:
         assert Moderation.parse_time("31d") is None       # Over 30 days
     
     @patch('cogs.moderation.Path')
-    @patch('cogs.moderation.config')
-    def test_load_warnings_file_not_exists(self, mock_config, mock_path):
+    @patch('cogs.moderation.get_config')
+    def test_load_warnings_file_not_exists(self, mock_get_config, mock_path):
         """Test loading warnings when file doesn't exist."""
         mock_bot = MagicMock()
-        mock_config.max_warnings_before_action = 5
+        mock_get_config.return_value.max_warnings_before_action = 5
         mock_path.return_value.mkdir.return_value = None
         mock_path.return_value.exists.return_value = False
         
@@ -49,11 +49,11 @@ class TestModeration:
             mod = Moderation(mock_bot)
             assert mod.warnings == {}
     
-    @patch('cogs.moderation.config')
-    def test_save_warnings_success(self, mock_config):
+    @patch('cogs.moderation.get_config')
+    def test_save_warnings_success(self, mock_get_config):
         """Test successful warnings save."""
         mock_bot = MagicMock()
-        mock_config.max_warnings_before_action = 5
+        mock_get_config.return_value.max_warnings_before_action = 5
         
         with patch('cogs.moderation.Path') as mock_path, \
              patch('builtins.open', create=True) as mock_open, \
@@ -71,11 +71,11 @@ class TestModeration:
             
             assert result is True
     
-    @patch('cogs.moderation.config')
-    def test_load_warnings_file_exists(self, mock_config):
+    @patch('cogs.moderation.get_config')
+    def test_load_warnings_file_exists(self, mock_get_config):
         """Test loading warnings when file exists with valid data."""
         mock_bot = MagicMock()
-        mock_config.max_warnings_before_action = 5
+        mock_get_config.return_value.max_warnings_before_action = 5
         
         test_warnings = {"123": ["reason1", "reason2"]}
         
