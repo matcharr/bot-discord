@@ -1,7 +1,7 @@
 # Discord Moderation Bot
 
 [![CI](https://github.com/matcharr/bot-discord/workflows/CI/badge.svg)](https://github.com/matcharr/bot-discord/actions)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Discord.py](https://img.shields.io/badge/discord.py-2.3.1-blue.svg)](https://discordpy.readthedocs.io/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -20,12 +20,25 @@ A comprehensive Discord bot with moderation tools, anti-raid protection, and ser
 # Install development dependencies
 pip install -r requirements-dev.txt
 
-# Setup pre-commit hooks
-make install
+# Setup Git hooks and workflow tools
+./scripts/setup-git-hooks.sh
+
+# Create a new feature branch
+./scripts/new-branch.sh feat "your-feature-name"
 
 # Format and lint code
 make check
 ```
+
+### Git Workflow
+This project uses a standardized Git workflow with automated tools:
+
+- **Branch naming**: `feat/`, `fix/`, `chore/`, `docs/`, `refactor/`, `test/`
+- **Automated branch creation**: `./scripts/new-branch.sh <type> <description>`
+- **Branch cleanup**: `./scripts/cleanup-branches.sh`
+- **Commit validation**: Enforced conventional commit format
+
+See [docs/git-workflow.md](docs/git-workflow.md) for complete documentation.
 
 ## Features & Commands
 
