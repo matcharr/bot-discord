@@ -120,6 +120,25 @@ Ces noms de branches sont **interdits** :
 - `wip`
 - Tout nom sans préfixe type/
 
+## 🧹 Nettoyage des branches
+
+### Script automatique
+```bash
+./scripts/cleanup-branches.sh
+```
+
+### Commandes manuelles
+```bash
+# Nettoyer les références distantes
+git remote prune origin
+
+# Voir les branches locales mergées
+git branch --merged main
+
+# Supprimer les branches locales mergées (sauf main)
+git branch --merged main | grep -v "main" | xargs -n 1 git branch -d
+```
+
 ## 💡 Conseils
 
 ### Noms de branches
@@ -139,3 +158,8 @@ Ces noms de branches sont **interdits** :
 - Description claire des changements
 - Lier les issues concernées
 - Demander une review si nécessaire
+
+### Maintenance régulière
+- Nettoyez les branches après chaque merge
+- Utilisez `./scripts/cleanup-branches.sh` régulièrement
+- Fermez les PRs Dependabot obsolètes sur GitHub
