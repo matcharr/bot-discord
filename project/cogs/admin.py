@@ -5,7 +5,7 @@ from datetime import datetime
 
 import discord
 import psutil
-from config import config
+from config import get_config
 from discord.ext import commands
 from utils.backup import backup_manager
 from utils.health import health_checker
@@ -89,28 +89,28 @@ class Admin(commands.Cog):
 
         embed.add_field(
             name="General",
-            value=f"Prefix: `{config.command_prefix}`\n"
-            f"Case Insensitive: {config.case_insensitive}",
+            value=f"Prefix: `{get_config().command_prefix}`\n"
+            f"Case Insensitive: {get_config().case_insensitive}",
             inline=True,
         )
 
         embed.add_field(
             name="Anti-Raid",
-            value=f"Spam Threshold: {config.spam_threshold}\n"
-            f"Kick Threshold: {config.kick_threshold}\n"
-            f"Cooldown: {config.cooldown_seconds}s",
+            value=f"Spam Threshold: {get_config().spam_threshold}\n"
+            f"Kick Threshold: {get_config().kick_threshold}\n"
+            f"Cooldown: {get_config().cooldown_seconds}s",
             inline=True,
         )
 
         embed.add_field(
             name="Moderation",
-            value=f"Max Warnings: {config.max_warnings_before_action}\n"
-            f"Audit Logging: {config.enable_audit_logging}",
+            value=f"Max Warnings: {get_config().max_warnings_before_action}\n"
+            f"Audit Logging: {get_config().enable_audit_logging}",
             inline=True,
         )
 
         embed.add_field(
-            name="Logging", value=f"Log Level: {config.log_level}", inline=True
+            name="Logging", value=f"Log Level: {get_config().log_level}", inline=True
         )
 
         await ctx.send(embed=embed)
