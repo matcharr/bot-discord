@@ -73,5 +73,10 @@ data/
 temp/
 config.json
 
+# Temporary planning files (keep local only)
+TEMP_*.md
+*_PLAN.md
+notes/
+
 # Docker
 .dockerignore
