@@ -1,10 +1,7 @@
 import asyncio
-import json
 import logging
-
 import re
-from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 import discord
 from config import get_config
@@ -12,41 +9,23 @@ from discord.ext import commands
 from utils.audit import log_moderation_action
 from utils.permissions import validate_hierarchy
 
+# Import our secure database system
+from database.services import get_warning_service
+from database.connection import init_database
+
 logger = logging.getLogger(__name__)
 
 
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.data_dir = Path("data")
-        self.data_dir.mkdir(exist_ok=True)
-        self.warnings_file = self.data_dir / "warnings.json"
-        self.warnings: Dict[str, List[str]] = self._load_warnings()
-
-    def _load_warnings(self) -> Dict[str, List[str]]:
-        """Load warnings from JSON file with error handling."""
+        # Initialize database on startup
         try:
-            if self.warnings_file.exists():
-                with open(self.warnings_file, "r", encoding="utf-8") as file:
-                    data = json.load(file)
-                    # Validate data structure
-                    if isinstance(data, dict):
-                        return {k: v for k, v in data.items() if isinstance(v, list)}
-                    return {}
-            return {}
-        except (json.JSONDecodeError, PermissionError) as e:
-            logger.error(f"Error loading warnings: {e}")
-            return {}
-
-    def _save_warnings(self) -> bool:
-        """Save warnings to JSON file with error handling."""
-        try:
-            with open(self.warnings_file, "w", encoding="utf-8") as file:
-                json.dump(self.warnings, file, indent=2, ensure_ascii=False)
-            return True
-        except (PermissionError, OSError) as e:
-            logger.error(f"Error saving warnings: {e}")
-            return False
+            init_database()
+            logger.info("✅ Database initialized for moderation system")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize database: {e}")
+            raise
 
     @commands.command(name="warn")
     @commands.has_permissions(manage_messages=True)
@@ -63,87 +42,154 @@ class Moderation(commands.Cog):
             await ctx.send("❌ Warning reason must be less than 500 characters.")
             return
 
-        # Add warning
-        user_id = str(member.id)
-        if user_id not in self.warnings:
-            self.warnings[user_id] = []
-        self.warnings[user_id].append(reason)
-
-        # Save to file
-        if not self._save_warnings():
-            await ctx.send("⚠️ Warning added but failed to save to file.")
-
-        # Check if user has reached warning limit
-        warning_count = len(self.warnings[user_id])
-        max_warnings = get_config().max_warnings_before_action
-
-        embed = discord.Embed(
-            title="⚠️ User Warned",
-            color=discord.Color.orange(),
-            description=f"{member.mention} has been warned.",
-        )
-        embed.add_field(name="Reason", value=reason, inline=False)
-        embed.add_field(
-            name="Warning Count", value=f"{warning_count}/{max_warnings}", inline=True
-        )
-        embed.add_field(name="Moderator", value=ctx.author.mention, inline=True)
-
-        if warning_count >= max_warnings:
-            embed.add_field(
-                name="⚠️ Action Required",
-                value=f"User has reached {max_warnings} warnings!",
-                inline=False,
+        # Add warning to secure database
+        service = get_warning_service()
+        try:
+            warning = service.add_warning(
+                guild_id=str(ctx.guild.id),
+                user_id=str(member.id),
+                moderator_id=str(ctx.author.id),
+                reason=reason
             )
 
-        await ctx.send(embed=embed)
-        await self.log(ctx.guild, "Warning", member, reason)
-        await log_moderation_action("WARN", ctx.author, member, reason, ctx.guild)
+            # Get updated warning count
+            warning_count = service.get_warning_count(
+                str(ctx.guild.id), 
+                str(member.id)
+            )
+            max_warnings = get_config().max_warnings_before_action
+
+            embed = discord.Embed(
+                title="⚠️ User Warned",
+                color=discord.Color.orange(),
+                description=f"{member.mention} has been warned.",
+            )
+            embed.add_field(name="Reason", value=reason, inline=False)
+            embed.add_field(
+                name="Warning Count", value=f"{warning_count}/{max_warnings}", inline=True
+            )
+            embed.add_field(name="Moderator", value=ctx.author.mention, inline=True)
+            embed.add_field(name="Warning ID", value=f"#{warning.id}", inline=True)
+
+            if warning_count >= max_warnings:
+                embed.add_field(
+                    name="⚠️ Action Required",
+                    value=f"User has reached {max_warnings} warnings!",
+                    inline=False,
+                )
+
+            await ctx.send(embed=embed)
+            await self.log(ctx.guild, "Warning", member, reason)
+            await log_moderation_action("WARN", ctx.author, member, reason, ctx.guild)
+            
+            logger.info(f"Warning {warning.id} added for user {member.id} in guild {ctx.guild.id}")
+
+        except Exception as e:
+            logger.error(f"Failed to add warning: {e}")
+            await ctx.send("❌ Failed to add warning. Please try again.")
+        finally:
+            service.close()
 
     @commands.command(name="warnings")
     @commands.has_permissions(manage_messages=True)
     async def list_warnings(self, ctx, member: discord.Member):
-        user_warnings = self.warnings.get(str(member.id), [])
+        service = get_warning_service()
+        try:
+            user_warnings = service.get_user_warnings(
+                str(ctx.guild.id), 
+                str(member.id)
+            )
 
-        embed = discord.Embed(
-            title=f"📋 Warnings for {member.display_name}", color=discord.Color.blue()
-        )
-        embed.set_thumbnail(url=member.display_avatar.url)
+            embed = discord.Embed(
+                title=f"📋 Warnings for {member.display_name}", 
+                color=discord.Color.blue()
+            )
+            embed.set_thumbnail(url=member.display_avatar.url)
 
-        if not user_warnings:
-            embed.description = "No warnings found."
-        else:
-            for i, warning in enumerate(user_warnings, 1):
-                embed.add_field(
-                    name=f"Warning #{i}",
-                    value=warning or "No reason provided",
-                    inline=False,
-                )
+            if not user_warnings:
+                embed.description = "No warnings found."
+            else:
+                for i, warning in enumerate(user_warnings, 1):
+                    reason = warning.get_decrypted_reason()
+                    created_date = warning.created_at.strftime("%Y-%m-%d %H:%M")
+                    
+                    embed.add_field(
+                        name=f"Warning #{warning.id}",
+                        value=f"**Reason:** {reason}\n**Date:** {created_date}",
+                        inline=False,
+                    )
 
-        embed.set_footer(text=f"Total warnings: {len(user_warnings)}")
-        await ctx.send(embed=embed)
+            embed.set_footer(text=f"Total warnings: {len(user_warnings)}")
+            await ctx.send(embed=embed)
+
+        except Exception as e:
+            logger.error(f"Failed to get warnings: {e}")
+            await ctx.send("❌ Failed to retrieve warnings. Please try again.")
+        finally:
+            service.close()
 
     @commands.command(name="clearwarnings")
     @commands.has_permissions(manage_messages=True)
     async def clear_warnings(self, ctx, member: discord.Member):
-        """Clear all warnings for a user."""
-        user_id = str(member.id)
-        if user_id in self.warnings:
-            warning_count = len(self.warnings[user_id])
-            del self.warnings[user_id]
-            self._save_warnings()
+        """Clear all warnings for a user (soft delete for GDPR compliance)."""
+        service = get_warning_service()
+        try:
+            # Get current warnings
+            user_warnings = service.get_user_warnings(
+                str(ctx.guild.id), 
+                str(member.id)
+            )
+            
+            if not user_warnings:
+                await ctx.send(f"ℹ️ {member.mention} has no warnings to clear.")
+                return
+
+            # Soft delete all warnings
+            cleared_count = 0
+            for warning in user_warnings:
+                if service.delete_warning(warning.id):
+                    cleared_count += 1
 
             await ctx.send(
-                f"✅ Cleared {warning_count} warning(s) for {member.mention}"
+                f"✅ Cleared {cleared_count} warning(s) for {member.mention}"
             )
             await log_moderation_action(
                 "CLEAR_WARNINGS",
                 ctx.author,
                 member,
-                f"Cleared {warning_count} warnings",
+                f"Cleared {cleared_count} warnings",
                 ctx.guild,
             )
-        else:
-            await ctx.send(f"ℹ️ {member.mention} has no warnings to clear.")
+
+        except Exception as e:
+            logger.error(f"Failed to clear warnings: {e}")
+            await ctx.send("❌ Failed to clear warnings. Please try again.")
+        finally:
+            service.close()
+
+    @commands.command(name="deletewarning")
+    @commands.has_permissions(manage_messages=True)
+    async def delete_warning(self, ctx, warning_id: int):
+        """Delete a specific warning by ID."""
+        service = get_warning_service()
+        try:
+            if service.delete_warning(warning_id):
+                await ctx.send(f"✅ Warning #{warning_id} has been deleted.")
+                await log_moderation_action(
+                    "DELETE_WARNING",
+                    ctx.author,
+                    None,
+                    f"Deleted warning #{warning_id}",
+                    ctx.guild,
+                )
+            else:
+                await ctx.send(f"❌ Warning #{warning_id} not found or already deleted.")
+
+        except Exception as e:
+            logger.error(f"Failed to delete warning: {e}")
+            await ctx.send("❌ Failed to delete warning. Please try again.")
+        finally:
+            service.close()
 
     @commands.command(name="kick")
     @commands.has_permissions(kick_members=True)
