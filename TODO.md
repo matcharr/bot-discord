@@ -13,16 +13,19 @@
 - [x] Add proper branch naming conventions and validation hooks
 - [x] Create automated branch cleanup utilities
 
-## High Priority
-- [ ] Database storage for warnings instead of JSON files
+## 🔥 High Priority - Impact Immédiat
+- [ ] **Complete test coverage** - Write tests for admin.py, anti_raid.py, etc.
+- [ ] **Confirmation prompts** - Add confirmations for destructive operations (ban, kick, purge)
+- [ ] **Database storage** - Replace JSON warnings with SQLite/PostgreSQL (needs infrastructure planning)
 - [ ] More granular permissions per command (custom permission system)
 - [ ] Integrate new permission validation utilities
 
-## Medium Priority  
-- [ ] Add confirmation prompts for destructive operations (ban, kick, purge)
+## 🚀 Medium Priority - Cool Features
+- [ ] **Slash commands migration** - Modernize to Discord slash commands
+- [ ] **Admin dashboard** - Commands for stats, active mutes, server overview
+- [ ] **Advanced auto-moderation** - Links detection, caps lock, spam patterns
 - [ ] Implement warning limits with automatic actions (auto-mute after X warnings)
 - [ ] Add bulk moderation commands (bulk ban, bulk role assignment)
-- [ ] Create admin dashboard commands (view stats, active mutes, etc.)
 - [ ] Integrate audit logging system in all moderation commands
 
 ## Low Priority
@@ -32,11 +35,12 @@
 - [ ] Add reaction-based role assignment system
 - [ ] Implement auto-moderation for links, caps, etc.
 
-## Technical Improvements
-- [ ] Add health check endpoints
+## 🛠️ Technical Improvements
+- [ ] **Health check system** - Monitoring endpoints and bot status
+- [ ] **Deployment guide** - Docker, systemd, complete setup documentation
 - [ ] Create backup/restore functionality for warnings
 - [ ] Add metrics and monitoring
-- [ ] Implement database migrations system
+- [ ] Implement database migrations system (when DB is implemented)
 
 ## Testing & Quality
 - [x] Write unit tests for config and moderation modules
@@ -54,6 +58,13 @@
 - [ ] Document all available bot commands
 - [ ] Create API documentation for utility functions
 
+## 🎯 Next Sprint Candidates (Prioritized)
+1. **Tests Coverage** - Safe, immediate value, good learning
+2. **Confirmation Prompts** - Simple UX improvement, prevents accidents  
+3. **Slash Commands** - Modernizes bot, better Discord integration
+4. **Deployment Docs** - Helps community adoption
+5. **Database Migration** - Major improvement but needs careful planning
+
 ## Recent Improvements (2025)
 - ✅ **Security**: Fixed exposed .env file vulnerability
 - ✅ **CI/CD**: Resolved test failures with lazy config loading
@@ -61,3 +72,4 @@
 - ✅ **Workflow**: Added automated Git workflow tools and branch management
 - ✅ **Testing**: Improved test coverage and CI reliability
 - ✅ **Code Quality**: Enhanced linting, formatting, and type checking setup
+- ✅ **Project Cleanup**: Comprehensive cleanup and documentation improvements
