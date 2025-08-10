@@ -59,5 +59,12 @@ class BotConfig:
         )
 
 
-# Global config instance
-config = BotConfig.from_env()
+# Global config instance - lazy loaded
+_config = None
+
+def get_config() -> BotConfig:
+    """Get the global config instance, creating it if needed."""
+    global _config
+    if _config is None:
+        _config = BotConfig.from_env()
+    return _config

@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import Dict, Set
 
 import discord
-from config import config
+from config import get_config
 from discord.ext import commands
 from utils.audit import log_moderation_action
 
@@ -31,15 +31,15 @@ class AntiRaid(commands.Cog):
         self.spam_count[message.author] += 1
 
         # Flag user as potential spammer
-        if self.spam_count[message.author] == config.spam_threshold:
+        if self.spam_count[message.author] == get_config().spam_threshold:
             self.spam_users.add(message.author)
             logger.info(
-                f"User {message.author} flagged for spam (threshold: {config.spam_threshold})"
+                f"User {message.author} flagged for spam (threshold: {get_config().spam_threshold})"
             )
 
         # Take action if kick threshold reached
         if message.author in self.spam_users:
-            if self.spam_count[message.author] >= config.kick_threshold:
+            if self.spam_count[message.author] >= get_config().kick_threshold:
                 try:
                     await message.author.kick(reason="Automatic kick: Spam detected")
 
@@ -81,7 +81,7 @@ class AntiRaid(commands.Cog):
     async def _cooldown_user(self, user: discord.Member):
         """Handle user cooldown and count reduction."""
         try:
-            await asyncio.sleep(config.cooldown_seconds)
+            await asyncio.sleep(get_config().cooldown_seconds)
 
             if user in self.spam_count:
                 self.spam_count[user] -= 1
@@ -107,9 +107,9 @@ class AntiRaid(commands.Cog):
 
         embed.add_field(
             name="Configuration",
-            value=f"Spam Threshold: {config.spam_threshold}\n"
-            f"Kick Threshold: {config.kick_threshold}\n"
-            f"Cooldown: {config.cooldown_seconds}s",
+            value=f"Spam Threshold: {get_config().spam_threshold}\n"
+            f"Kick Threshold: {get_config().kick_threshold}\n"
+            f"Cooldown: {get_config().cooldown_seconds}s",
             inline=True,
         )
 
