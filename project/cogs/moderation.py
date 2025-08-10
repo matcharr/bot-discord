@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import discord
-from config import config
+from config import get_config
 from discord.ext import commands
 from utils.audit import log_moderation_action
 from utils.permissions import validate_hierarchy
@@ -75,7 +75,7 @@ class Moderation(commands.Cog):
 
         # Check if user has reached warning limit
         warning_count = len(self.warnings[user_id])
-        max_warnings = config.max_warnings_before_action
+        max_warnings = get_config().max_warnings_before_action
 
         embed = discord.Embed(
             title="⚠️ User Warned",

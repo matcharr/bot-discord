@@ -8,7 +8,7 @@ import asyncio
 
 import discord
 import utils.health as health_module
-from config import config
+from config import get_config
 from discord.ext import commands
 from utils.health import HealthChecker
 from utils.logger import setup_logger
@@ -25,8 +25,8 @@ intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(
-    command_prefix=config.command_prefix,
-    case_insensitive=config.case_insensitive,
+    command_prefix=get_config().command_prefix,
+    case_insensitive=get_config().case_insensitive,
     intents=intents,
     help_command=None,  # We'll create a custom one
 )
@@ -113,7 +113,7 @@ async def main():
     """Main bot function."""
     try:
         await load_cogs()
-        await bot.start(config.token)
+        await bot.start(get_config().token)
     except KeyboardInterrupt:
         logger.info("Bot shutdown requested")
     except Exception as e:
