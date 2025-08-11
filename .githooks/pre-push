@@ -1,35 +1,49 @@
 #!/bin/sh
-# Hook pour valider les noms de branches avant push
+# Hook to validate branch names before push
 
-# Récupérer le nom de la branche actuelle
+# Get current branch name
 branch=$(git rev-parse --abbrev-ref HEAD)
 
-# Regex pour valider le nom de branche
+# Regex to validate branch name
 valid_pattern="^(feat|fix|chore|docs|refactor|test)\/[a-z0-9-]+$"
 
-# Branches spéciales autorisées
+# Special allowed branches
 if [ "$branch" = "main" ] || [ "$branch" = "develop" ] || [ "$branch" = "master" ]; then
     exit 0
 fi
 
-# Vérifier le format
+# Check format
 if ! echo "$branch" | grep -qE "$valid_pattern"; then
-    echo "❌ Nom de branche invalide: $branch"
+    echo "❌ Invalid branch name: $branch"
     echo ""
-    echo "Format requis: type/description-en-kebab-case"
-    echo "Types valides: feat, fix, chore, docs, refactor, test"
+    echo "Required format: type/description-in-kebab-case"
+    echo "Valid types: feat, fix, chore, docs, refactor, test"
     echo ""
-    echo "Exemples valides:"
+    echo "Valid examples:"
     echo "  feat/add-user-authentication"
     echo "  fix/memory-leak-issue"
     echo "  chore/update-dependencies"
     echo "  docs/api-documentation"
     echo ""
-    echo "Pour renommer votre branche:"
-    echo "  git branch -m $branch <nouveau-nom>"
+    echo "To rename your branch:"
+    echo "  git branch -m $branch <new-name>"
     echo ""
     exit 1
 fi
 
-echo "✅ Nom de branche valide: $branch"
+echo "✅ Valid branch name: $branch"
+
+# Run CI-critical checks before push
+echo "🔍 Running CI-critical checks..."
+if ! make check-ci > /dev/null 2>&1; then
+    echo "❌ CI checks failed! Run 'make check-ci' to see details."
+    echo ""
+    echo "To fix common issues:"
+    echo "  make format     # Fix formatting"
+    echo "  make check-ci   # Check syntax"
+    echo ""
+    exit 1
+fi
+
+echo "✅ CI checks passed!"
 exit 0

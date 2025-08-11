@@ -42,6 +42,9 @@ chore: update dependencies for security patches
 
 ## Code Standards
 
+### Language Policy
+**IMPORTANT**: This project uses English for all code, documentation, and messages.
+
 ### Python
 - Follow PEP 8
 - Use type hints where possible
