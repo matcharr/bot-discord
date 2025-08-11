@@ -32,4 +32,18 @@ if ! echo "$branch" | grep -qE "$valid_pattern"; then
 fi
 
 echo "✅ Valid branch name: $branch"
+
+# Run CI-critical checks before push
+echo "🔍 Running CI-critical checks..."
+if ! make check-ci > /dev/null 2>&1; then
+    echo "❌ CI checks failed! Run 'make check-ci' to see details."
+    echo ""
+    echo "To fix common issues:"
+    echo "  make format     # Fix formatting"
+    echo "  make check-ci   # Check syntax"
+    echo ""
+    exit 1
+fi
+
+echo "✅ CI checks passed!"
 exit 0

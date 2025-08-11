@@ -18,8 +18,8 @@ git-setup: ## Setup Git hooks and workflow tools
 	./scripts/setup-git-hooks.sh
 
 format: ## Format code with black and isort
-	PYTHONPATH=project black project/
-	PYTHONPATH=project isort project/
+	PYTHONPATH=project black project/ --line-length 88
+	PYTHONPATH=project isort project/ --profile black
 
 lint: ## Run linting checks
 	PYTHONPATH=project flake8 project/
@@ -36,6 +36,18 @@ clean: ## Clean up cache and temporary files
 	find . -type d -name "__pycache__" -delete
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	rm -rf .mypy_cache .pytest_cache htmlcov .coverage coverage.xml
+
+check-ci: ## Run CI-critical checks (must pass before push)
+	@echo "🔍 Running CI-critical syntax checks..."
+	PYTHONPATH=project flake8 project/ --count --select=E9,F63,F7,F82 --show-source --statistics
+	@echo "✅ CI checks passed!"
+
+check-format: ## Check if code needs formatting
+	PYTHONPATH=project black project/ --check --line-length 88
+	PYTHONPATH=project isort project/ --profile black --check-only
+
+pre-push: check-ci check-format ## Run all pre-push checks
+	@echo "🚀 Ready to push!"
 
 check: format lint ## Format and lint code
 
