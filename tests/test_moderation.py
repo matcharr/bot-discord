@@ -35,59 +35,41 @@ class TestModeration:
         assert Moderation.parse_time("30d") == 2592000    # 30 days
         assert Moderation.parse_time("31d") is None       # Over 30 days
     
-    @patch('cogs.moderation.Path')
+    @patch('cogs.moderation.init_database')
     @patch('cogs.moderation.get_config')
-    def test_load_warnings_file_not_exists(self, mock_get_config, mock_path):
-        """Test loading warnings when file doesn't exist."""
+    def test_moderation_cog_initialization(self, mock_get_config, mock_init_db):
+        """Test moderation cog initializes with database."""
         mock_bot = MagicMock()
         mock_get_config.return_value.max_warnings_before_action = 5
-        mock_path.return_value.mkdir.return_value = None
-        mock_path.return_value.exists.return_value = False
+        mock_init_db.return_value = None
         
-        with patch('cogs.moderation.validate_hierarchy'), \
-             patch('cogs.moderation.log_moderation_action'):
-            mod = Moderation(mock_bot)
-            assert mod.warnings == {}
+        mod = Moderation(mock_bot)
+        assert mod.bot == mock_bot
+        mock_init_db.assert_called_once()
     
+    @patch('cogs.moderation.get_warning_service')
+    @patch('cogs.moderation.init_database')
     @patch('cogs.moderation.get_config')
-    def test_save_warnings_success(self, mock_get_config):
-        """Test successful warnings save."""
+    def test_database_service_integration(self, mock_get_config, mock_init_db, mock_get_service):
+        """Test that moderation cog integrates with database service."""
         mock_bot = MagicMock()
+        mock_service = MagicMock()
+        mock_get_service.return_value = mock_service
         mock_get_config.return_value.max_warnings_before_action = 5
         
-        with patch('cogs.moderation.Path') as mock_path, \
-             patch('builtins.open', create=True) as mock_open, \
-             patch('json.dump') as mock_json_dump, \
-             patch('json.load') as mock_json_load, \
-             patch('cogs.moderation.validate_hierarchy'), \
-             patch('cogs.moderation.log_moderation_action'):
-            
-            mock_path.return_value.mkdir.return_value = None
-            mock_path.return_value.exists.return_value = False
-            mock_json_load.return_value = {}  # Return empty dict for warnings
-            
-            mod = Moderation(mock_bot)
-            result = mod._save_warnings()
-            
-            assert result is True
+        mod = Moderation(mock_bot)
+        service = mock_get_service()
+        
+        assert service == mock_service
+        mock_get_service.assert_called()
     
+    @patch('cogs.moderation.init_database')
     @patch('cogs.moderation.get_config')
-    def test_load_warnings_file_exists(self, mock_get_config):
-        """Test loading warnings when file exists with valid data."""
+    def test_database_initialization_failure(self, mock_get_config, mock_init_db):
+        """Test moderation cog handles database initialization failure."""
         mock_bot = MagicMock()
         mock_get_config.return_value.max_warnings_before_action = 5
+        mock_init_db.side_effect = Exception("Database connection failed")
         
-        test_warnings = {"123": ["reason1", "reason2"]}
-        
-        with patch('cogs.moderation.Path') as mock_path, \
-             patch('builtins.open', create=True) as mock_open, \
-             patch('json.load') as mock_json_load, \
-             patch('cogs.moderation.validate_hierarchy'), \
-             patch('cogs.moderation.log_moderation_action'):
-            
-            mock_path.return_value.mkdir.return_value = None
-            mock_path.return_value.exists.return_value = True
-            mock_json_load.return_value = test_warnings
-            
-            mod = Moderation(mock_bot)
-            assert mod.warnings == test_warnings
+        with pytest.raises(Exception, match="Database connection failed"):
+            Moderation(mock_bot)
