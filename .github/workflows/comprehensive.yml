@@ -1,5 +1,8 @@
 name: Comprehensive Tests
 
+permissions:
+  contents: read
+
 # Only run comprehensive tests on important changes
 on:
   push:
