@@ -145,6 +145,13 @@ for cog in cogs:
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and commit message standards.
 
+## Documentation
+
+- **[Database Setup](docs/DATABASE.md)** - Database configuration and management
+- **[Git Workflow](docs/git-workflow.md)** - Git development process  
+- **[Setup Checklist](docs/SETUP_CHECKLIST.md)** - Step-by-step setup guide
+- **[Setup without Docker](docs/SETUP_NO_DOCKER.md)** - Alternative setup method
+
 ## Project Structure
 ```
 ├── project/cogs/          # Bot functionality modules
