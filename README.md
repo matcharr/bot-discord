@@ -9,16 +9,27 @@ A comprehensive Discord bot with moderation tools, anti-raid protection, and ser
 
 ## Quick Start
 
-1. Install dependencies: `pip install -r project/requirements.txt`
-2. Copy `.env.example` to `.env` and fill in your bot token and report channel ID
-3. Create a "logs" channel in your Discord server
-4. Load all cogs in your main bot file
+1. **Install dependencies**: `pip install -r project/requirements.txt`
+2. **Setup database**: `./scripts/db-manage.sh start && ./scripts/db-manage.sh init`
+3. **Configure environment**: Copy `.env.development` and update with your bot token
+4. **Create a "logs" channel** in your Discord server
+5. **Run the bot**: `python main.py`
 
 ## Development Setup
 
+### Prerequisites
+- Python 3.11+
+- Docker & Docker Compose
+- Git
+
+### Setup Steps
 ```bash
 # Install development dependencies
 pip install -r requirements-dev.txt
+
+# Setup database (PostgreSQL via Docker)
+./scripts/db-manage.sh start
+./scripts/db-manage.sh init
 
 # Setup Git hooks and workflow tools
 ./scripts/setup-git-hooks.sh
@@ -26,9 +37,32 @@ pip install -r requirements-dev.txt
 # Create a new feature branch
 ./scripts/new-branch.sh feat "your-feature-name"
 
+# Run tests
+python -m pytest
+
 # Format and lint code
 make check
 ```
+
+### Database Management
+```bash
+# Start PostgreSQL
+./scripts/db-manage.sh start
+
+# Stop PostgreSQL  
+./scripts/db-manage.sh stop
+
+# Reset database (⚠️ deletes all data)
+./scripts/db-manage.sh reset
+
+# Open PostgreSQL session
+./scripts/db-manage.sh psql
+
+# View logs
+./scripts/db-manage.sh logs
+```
+
+See [docs/DATABASE.md](docs/DATABASE.md) for complete database documentation.
 
 ### Git Workflow
 This project uses a standardized Git workflow with automated tools:

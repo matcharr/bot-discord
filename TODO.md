@@ -12,11 +12,17 @@
 - [x] Fix security issue with exposed .env file
 - [x] Add proper branch naming conventions and validation hooks
 - [x] Create automated branch cleanup utilities
+- [x] **Database storage** - Complete secure database layer with PostgreSQL/SQLite support
+- [x] **Security & GDPR** - Implement encryption, hashing, and GDPR compliance
+- [x] **Database tests** - Comprehensive test suite (26 tests) for database layer
+- [x] **Development environment** - Docker setup, scripts, and comprehensive documentation
+- [x] **Documentation** - Complete setup guides, database docs, and troubleshooting
+- [x] **English documentation** - Converted all French comments and docs to English
 
-## 🔥 High Priority - Impact Immédiat
+## 🔥 High Priority - Immediate Impact
+- [ ] **Discord integration** - Connect database layer to Discord bot commands
 - [ ] **Complete test coverage** - Write tests for admin.py, anti_raid.py, etc.
 - [ ] **Confirmation prompts** - Add confirmations for destructive operations (ban, kick, purge)
-- [ ] **Database storage** - Replace JSON warnings with SQLite/PostgreSQL (needs infrastructure planning)
 - [ ] More granular permissions per command (custom permission system)
 - [ ] Integrate new permission validation utilities
 

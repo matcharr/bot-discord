@@ -52,3 +52,37 @@ new-branch: ## Create a new branch (usage: make new-branch TYPE=feat DESC="descr
 
 cleanup-branches: ## Clean up merged branches
 	./scripts/cleanup-branches.sh
+
+# Database commands
+db-start: ## Start PostgreSQL database
+	./scripts/db-manage.sh start
+
+db-stop: ## Stop PostgreSQL database
+	./scripts/db-manage.sh stop
+
+db-restart: ## Restart PostgreSQL database
+	./scripts/db-manage.sh restart
+
+db-reset: ## Reset database (⚠️ deletes all data)
+	./scripts/db-manage.sh reset
+
+db-init: ## Initialize database tables
+	./scripts/db-manage.sh init
+
+db-psql: ## Open PostgreSQL session
+	./scripts/db-manage.sh psql
+
+db-logs: ## Show database logs
+	./scripts/db-manage.sh logs
+
+db-status: ## Show database status
+	./scripts/db-manage.sh status
+
+db-pgadmin: ## Start pgAdmin web interface
+	./scripts/db-manage.sh pgadmin
+
+test-db: ## Run database tests only
+	PYTHONPATH=project pytest tests/database/ -v
+
+dev-setup: db-start db-init ## Complete development setup with database
+	@echo "✅ Development environment with database ready!"

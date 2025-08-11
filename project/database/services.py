@@ -1,6 +1,7 @@
 """Database services for warning and moderation management."""
 
 from typing import List, Optional, Dict, Any
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc
 from .connection import get_db_session
@@ -148,7 +149,7 @@ class WarningService:
             
             export_data = {
                 "user_id_hash": user_hash,
-                "export_date": "datetime.now(timezone.utc).isoformat()",
+                "export_date": datetime.now(timezone.utc).isoformat(),
                 "warnings": [w.to_dict() for w in warnings],
                 "moderation_logs": [
                     {
@@ -165,7 +166,7 @@ class WarningService:
             # Create GDPR request record
             gdpr_request = GDPRRequest.create_request(user_id, 'export')
             gdpr_request.status = 'completed'
-            gdpr_request.completed_at = "datetime.now(timezone.utc)"
+            gdpr_request.completed_at = datetime.now(timezone.utc)
             self.db.add(gdpr_request)
             self.db.commit()
             
@@ -194,7 +195,7 @@ class WarningService:
             # Create GDPR request record
             gdpr_request = GDPRRequest.create_request(user_id, 'delete')
             gdpr_request.status = 'completed'
-            gdpr_request.completed_at = "datetime.now(timezone.utc)"
+            gdpr_request.completed_at = datetime.now(timezone.utc)
             self.db.add(gdpr_request)
             
             self.db.commit()

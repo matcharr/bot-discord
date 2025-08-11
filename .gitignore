@@ -2,7 +2,12 @@
 .env
 .env.local
 .env.*.local
+.env.production
 project/.env
+
+# Keep development and test env files for reference
+# .env.development
+# .env.test
 
 # Python
 __pycache__/
@@ -66,6 +71,18 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+warnings.db
+botdb_*
+
+# Docker volumes and data
+postgres_data/
+postgres_dev_data/
+pgdata/
+
+# Database backups
+*.sql.gz
+*.dump
+backups/
 
 # Bot specific
 warnings.json
@@ -80,3 +97,8 @@ notes/
 
 # Docker
 .dockerignore
+docker-compose.override.yml
+.docker/
+
+# Scripts logs
+scripts/*.log
