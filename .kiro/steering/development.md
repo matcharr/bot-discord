@@ -8,6 +8,13 @@
 - Run security checks for sensitive data handling
 - Remove obsolete files proactively when identified
 
+## CI Cost Optimization
+- Fast CI runs on all changes (syntax + critical tests)
+- Comprehensive CI runs only on code changes
+- Documentation changes skip CI automatically
+- Draft PRs skip CI to save costs
+- Use dependency caching for faster runs
+
 ## Security-First Approach
 - All sensitive data MUST be encrypted (warnings, user info)
 - Use hashed identifiers for Discord IDs (SHA-256 + salt + pepper)
@@ -34,11 +41,12 @@
 
 ### Quality Checks
 ```bash
-make check-ci          # CI-critical syntax checks
+make check-ci          # CI-critical syntax checks (matches fast CI)
 make pre-push          # Full pre-push validation
 make format            # Format code (black + isort)
 make check-security    # Security scanning
-make test-db           # Database tests only
+make test-db           # Database tests only (matches fast CI)
+make test              # Full test suite (matches comprehensive CI)
 ```
 
 ## Development Workflow

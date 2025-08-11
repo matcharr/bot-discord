@@ -42,10 +42,16 @@ make lint                     # Run flake8 and mypy
 
 ### Testing
 ```bash
-make test                     # Run tests with coverage
+make test                     # Run tests with coverage (comprehensive CI)
 make test-fast               # Run tests without coverage
-make test-db                 # Run database tests only
+make test-db                 # Run database tests only (fast CI)
 ```
+
+### CI/CD Strategy
+- **Fast CI**: Runs on all changes (syntax + critical tests, ~30s, low cost)
+- **Comprehensive CI**: Runs on code changes only (full suite + coverage, ~2min)
+- **Cost optimization**: Path filters, caching, single Python version for fast CI
+- **Manual trigger**: Can run comprehensive tests on demand
 
 ### Database Management
 ```bash
