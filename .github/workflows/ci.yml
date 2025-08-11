@@ -4,39 +4,39 @@ name: CI
 
 on:
   push:
-    branches: [ main ]  # Only run on main pushes
+    branches: [main] # Only run on main pushes
   pull_request:
-    branches: [ main ]
-    types: [opened, synchronize, ready_for_review]  # Skip draft PRs
-    paths-ignore:      # Skip CI for documentation-only changes
-      - '**.md'
-      - 'docs/**'
-      - '.kiro/**'
+    branches: [main]
+    types: [opened, synchronize, ready_for_review] # Skip draft PRs
+    paths-ignore: # Skip CI for documentation-only changes
+      - "**.md"
+      - "docs/**"
+      - ".kiro/**"
 
 jobs:
   # Fast syntax check - fails early to save costs
   syntax-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
-    - name: Install minimal dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8
-    - name: Critical syntax check
-      run: |
-        flake8 project/ --count --select=E9,F63,F7,F82 --show-source --statistics
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - name: Install minimal dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+      - name: Critical syntax check
+        run: |
+          flake8 project/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
   test:
-    needs: syntax-check  # Only run if syntax check passes
+    needs: syntax-check # Only run if syntax check passes
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11"]  # Single version for cost savings
+        python-version: ["3.9"] # Match local development version
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       REPORT_CHANNEL_ID: ${{ secrets.REPORT_CHANNEL_ID }}
@@ -46,32 +46,32 @@ jobs:
       ENABLE_AUDIT_LOGGING: ${{ vars.ENABLE_AUDIT_LOGGING }}
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Cache dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r project/requirements.txt
-        pip install -r requirements-dev.txt
-    
-    - name: Full lint check
-      run: |
-        flake8 project/ --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
-    
-    - name: Fast test (critical tests only)
-      run: |
-        export PYTHONPATH="${PYTHONPATH}:$(pwd)/project"
-        pytest tests/database/ tests/test_config.py -v --tb=short
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r project/requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Full lint check
+        run: |
+          flake8 project/ --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+
+      - name: Fast test (critical tests only)
+        run: |
+          export PYTHONPATH="${PYTHONPATH}:$(pwd)/project"
+          pytest tests/database/ tests/test_config.py -v --tb=short
