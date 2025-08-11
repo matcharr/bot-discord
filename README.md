@@ -147,10 +147,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and commit mes
 
 ## Documentation
 
-- **[Database Setup](docs/DATABASE.md)** - Database configuration and management
+- **[Database Setup](docs/database.md)** - Database configuration and management
 - **[Git Workflow](docs/git-workflow.md)** - Git development process  
-- **[Setup Checklist](docs/SETUP_CHECKLIST.md)** - Step-by-step setup guide
-- **[Setup without Docker](docs/SETUP_NO_DOCKER.md)** - Alternative setup method
+- **[Setup Checklist](docs/setup-checklist.md)** - Step-by-step setup guide
+- **[Setup without Docker](docs/setup-no-docker.md)** - Alternative setup method
 
 ## Project Structure
 ```
