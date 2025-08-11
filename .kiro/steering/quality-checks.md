@@ -26,9 +26,19 @@ flake8 project/ --count --statistics
 mypy project/ --ignore-missing-imports
 ```
 
-### 5. Tests
+### 5. Security Checks
+```bash
+# Check for hardcoded secrets
+grep -r "token\|password\|key\|secret" project/ --exclude-dir=__pycache__ | grep -v "# Safe"
+
+# Check for potential SQL injection
+grep -r "f\".*{.*}.*\"" project/database/ | grep -v "# Safe"
+```
+
+### 6. Tests
 ```bash
 python -m pytest tests/ -v
+make test-db  # Database tests specifically
 ```
 
 ## Quick Fix Commands
@@ -55,7 +65,12 @@ format: ## Format code
 	black project/ --line-length 88
 	isort project/ --profile black
 
-check: format check-ci ## Full quality check
+check-security: ## Run security checks
+	@echo "🔒 Checking for hardcoded secrets..."
+	@! grep -r "token\|password\|key\|secret" project/ --exclude-dir=__pycache__ | grep -v "# Safe" || (echo "❌ Potential secrets found!" && exit 1)
+	@echo "✅ No hardcoded secrets found"
+
+check: format check-ci check-security ## Full quality check
 	flake8 project/ --count --statistics
 	mypy project/ --ignore-missing-imports
 

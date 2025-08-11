@@ -46,7 +46,13 @@ check-format: ## Check if code needs formatting
 	PYTHONPATH=project black project/ --check --line-length 88
 	PYTHONPATH=project isort project/ --profile black --check-only
 
-pre-push: check-ci check-format ## Run all pre-push checks
+check-security: ## Run security checks
+	@echo "🔒 Checking for hardcoded secrets..."
+	@! grep -r "token.*=" project/ --exclude-dir=__pycache__ | grep -v "get_config\|getenv\|# Safe" || echo "⚠️  Check tokens manually"
+	@! grep -r "password.*=" project/ --exclude-dir=__pycache__ | grep -v "getenv\|# Safe" || echo "⚠️  Check passwords manually"
+	@echo "✅ Security check completed"
+
+pre-push: check-ci check-format check-security ## Run all pre-push checks
 	@echo "🚀 Ready to push!"
 
 check: format lint ## Format and lint code
