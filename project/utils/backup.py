@@ -1,6 +1,5 @@
 """Backup utilities for bot data."""
 
-
 import logging
 import shutil
 from datetime import datetime

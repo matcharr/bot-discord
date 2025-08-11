@@ -5,13 +5,13 @@ from typing import Optional
 
 import discord
 from config import get_config
-from discord.ext import commands
-from utils.audit import log_moderation_action
-from utils.permissions import validate_hierarchy
+from database.connection import init_database
 
 # Import our secure database system
 from database.services import get_warning_service
-from database.connection import init_database
+from discord.ext import commands
+from utils.audit import log_moderation_action
+from utils.permissions import validate_hierarchy
 
 logger = logging.getLogger(__name__)
 
@@ -49,14 +49,11 @@ class Moderation(commands.Cog):
                 guild_id=str(ctx.guild.id),
                 user_id=str(member.id),
                 moderator_id=str(ctx.author.id),
-                reason=reason
+                reason=reason,
             )
 
             # Get updated warning count
-            warning_count = service.get_warning_count(
-                str(ctx.guild.id), 
-                str(member.id)
-            )
+            warning_count = service.get_warning_count(str(ctx.guild.id), str(member.id))
             max_warnings = get_config().max_warnings_before_action
 
             embed = discord.Embed(
@@ -66,7 +63,9 @@ class Moderation(commands.Cog):
             )
             embed.add_field(name="Reason", value=reason, inline=False)
             embed.add_field(
-                name="Warning Count", value=f"{warning_count}/{max_warnings}", inline=True
+                name="Warning Count",
+                value=f"{warning_count}/{max_warnings}",
+                inline=True,
             )
             embed.add_field(name="Moderator", value=ctx.author.mention, inline=True)
             embed.add_field(name="Warning ID", value=f"#{warning.id}", inline=True)
@@ -81,8 +80,10 @@ class Moderation(commands.Cog):
             await ctx.send(embed=embed)
             await self.log(ctx.guild, "Warning", member, reason)
             await log_moderation_action("WARN", ctx.author, member, reason, ctx.guild)
-            
-            logger.info(f"Warning {warning.id} added for user {member.id} in guild {ctx.guild.id}")
+
+            logger.info(
+                f"Warning {warning.id} added for user {member.id} in guild {ctx.guild.id}"
+            )
 
         except Exception as e:
             logger.error(f"Failed to add warning: {e}")
@@ -95,14 +96,11 @@ class Moderation(commands.Cog):
     async def list_warnings(self, ctx, member: discord.Member):
         service = get_warning_service()
         try:
-            user_warnings = service.get_user_warnings(
-                str(ctx.guild.id), 
-                str(member.id)
-            )
+            user_warnings = service.get_user_warnings(str(ctx.guild.id), str(member.id))
 
             embed = discord.Embed(
-                title=f"📋 Warnings for {member.display_name}", 
-                color=discord.Color.blue()
+                title=f"📋 Warnings for {member.display_name}",
+                color=discord.Color.blue(),
             )
             embed.set_thumbnail(url=member.display_avatar.url)
 
@@ -112,7 +110,7 @@ class Moderation(commands.Cog):
                 for i, warning in enumerate(user_warnings, 1):
                     reason = warning.get_decrypted_reason()
                     created_date = warning.created_at.strftime("%Y-%m-%d %H:%M")
-                    
+
                     embed.add_field(
                         name=f"Warning #{warning.id}",
                         value=f"**Reason:** {reason}\n**Date:** {created_date}",
@@ -135,11 +133,8 @@ class Moderation(commands.Cog):
         service = get_warning_service()
         try:
             # Get current warnings
-            user_warnings = service.get_user_warnings(
-                str(ctx.guild.id), 
-                str(member.id)
-            )
-            
+            user_warnings = service.get_user_warnings(str(ctx.guild.id), str(member.id))
+
             if not user_warnings:
                 await ctx.send(f"ℹ️ {member.mention} has no warnings to clear.")
                 return
@@ -183,7 +178,9 @@ class Moderation(commands.Cog):
                     ctx.guild,
                 )
             else:
-                await ctx.send(f"❌ Warning #{warning_id} not found or already deleted.")
+                await ctx.send(
+                    f"❌ Warning #{warning_id} not found or already deleted."
+                )
 
         except Exception as e:
             logger.error(f"Failed to delete warning: {e}")

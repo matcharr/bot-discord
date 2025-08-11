@@ -71,7 +71,10 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
-warnings.db
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 botdb_*
 
 # Docker volumes and data

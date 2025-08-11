@@ -1,7 +1,6 @@
 import os
 from dataclasses import dataclass
 
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -61,6 +60,7 @@ class BotConfig:
 
 # Global config instance - lazy loaded
 _config = None
+
 
 def get_config() -> BotConfig:
     """Get the global config instance, creating it if needed."""
