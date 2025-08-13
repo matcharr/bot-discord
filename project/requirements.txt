@@ -23,5 +23,5 @@ yarl==1.20.1
 # Database dependencies
 sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
-cryptography==3.4.8
+cryptography==42.0.7
 alembic==1.13.1

@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Python Quality Check",
+  "description": "Automatically run quality checks and formatting when Python files are saved. Runs make check-ci to catch syntax errors, make format to auto-format code, and make check-security to scan for security issues.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A Python file has been saved. Please run the following commands in sequence:\n\n1. First run `make check-ci` to catch syntax errors immediately and show any errors found\n2. Then run `make format` to auto-format the code and always show the formatting results\n3. Finally run `make check-security` to scan for security issues and show any security warnings found\n\nThis helps catch issues before commit and maintains consistent code style. Always show the results of each step, especially any errors from check-ci, formatting changes from format, and security warnings from check-security."
+  }
+}

@@ -5,9 +5,9 @@
 .env.production
 project/.env
 
-# Keep development and test env files for reference
-# .env.development
-# .env.test
+# Keep development and test env files for reference (use .env.example instead)
+.env.development
+.env.test
 
 # Python
 __pycache__/
@@ -99,9 +99,7 @@ TEMP_*.md
 notes/
 
 # Docker
-.dockerignore
 docker-compose.override.yml
 .docker/
-
 # Scripts logs
 scripts/*.log

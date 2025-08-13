@@ -35,7 +35,7 @@ class DatabaseCleanup:
                 self.db.query(SecureWarning)
                 .filter(
                     and_(
-                        SecureWarning.is_deleted == True,
+                        SecureWarning.is_deleted.is_(True),
                         SecureWarning.deleted_at < cutoff_date,
                     )
                 )
@@ -103,7 +103,7 @@ class DatabaseCleanup:
                 self.db.query(SecureWarning)
                 .filter(
                     and_(
-                        SecureWarning.is_deleted == True,
+                        SecureWarning.is_deleted.is_(True),
                         SecureWarning.deleted_at < now - timedelta(days=30),
                     )
                 )
@@ -114,7 +114,7 @@ class DatabaseCleanup:
                 self.db.query(SecureWarning)
                 .filter(
                     and_(
-                        SecureWarning.is_deleted == True,
+                        SecureWarning.is_deleted.is_(True),
                         SecureWarning.deleted_at < now - timedelta(days=180),
                     )
                 )

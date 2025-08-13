@@ -1,4 +1,13 @@
-.PHONY: help install format lint test clean setup git-setup
+.PHONY: help install format lint test clean setup git-setup \
+	check-ci check-format check-security pre-push \
+	db-start db-stop db-restart db-reset db-init db-psql \
+	db-logs db-status db-pgadmin test-db dev-setup \
+	check run new-branch cleanup-branches test-fast
+
+# Virtual environment paths
+VENV = .venv
+PYTHON = $(VENV)/bin/python
+PIP = $(VENV)/bin/pip
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -7,9 +16,9 @@ help: ## Show this help message
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 install: ## Install dependencies and pre-commit hooks
-	pip install -r project/requirements.txt
-	pip install -r requirements-dev.txt
-	pre-commit install
+	$(PIP) install -r project/requirements.txt
+	$(PIP) install -r requirements-dev.txt
+	$(VENV)/bin/pre-commit install
 
 setup: install git-setup ## Complete development setup
 	@echo "✅ Development environment ready!"
@@ -18,18 +27,18 @@ git-setup: ## Setup Git hooks and workflow tools
 	./scripts/setup-git-hooks.sh
 
 format: ## Format code with black and isort
-	PYTHONPATH=project black project/ --line-length 88
-	PYTHONPATH=project isort project/ --profile black
+	PYTHONPATH=project $(VENV)/bin/black project/ --line-length 88
+	PYTHONPATH=project $(VENV)/bin/isort project/ --profile black
 
 lint: ## Run linting checks
-	PYTHONPATH=project flake8 project/
-	PYTHONPATH=project mypy project/ --ignore-missing-imports || true
+	PYTHONPATH=project $(VENV)/bin/flake8 project/
+	PYTHONPATH=project $(VENV)/bin/mypy project/ --ignore-missing-imports || true
 
 test: ## Run tests with coverage
-	PYTHONPATH=project pytest tests/ -v --cov=project/ --cov-report=xml --cov-report=html
+	PYTHONPATH=project $(VENV)/bin/pytest tests/ -v --cov=project/ --cov-report=xml --cov-report=html
 
 test-fast: ## Run tests without coverage
-	PYTHONPATH=project pytest tests/ -v
+	PYTHONPATH=project $(VENV)/bin/pytest tests/ -v
 
 clean: ## Clean up cache and temporary files
 	find . -type f -name "*.pyc" -delete
@@ -39,12 +48,12 @@ clean: ## Clean up cache and temporary files
 
 check-ci: ## Run CI-critical checks (must pass before push)
 	@echo "🔍 Running CI-critical syntax checks..."
-	PYTHONPATH=project flake8 project/ --count --select=E9,F63,F7,F82 --show-source --statistics
+	PYTHONPATH=project $(VENV)/bin/flake8 project/ --count --select=E9,F63,F7,F82 --show-source --statistics
 	@echo "✅ CI checks passed!"
 
 check-format: ## Check if code needs formatting
-	PYTHONPATH=project black project/ --check --line-length 88
-	PYTHONPATH=project isort project/ --profile black --check-only
+	PYTHONPATH=project $(VENV)/bin/black project/ --check --line-length 88
+	PYTHONPATH=project $(VENV)/bin/isort project/ --profile black --check-only
 
 check-security: ## Run security checks
 	@echo "🔒 Checking for hardcoded secrets..."
@@ -58,7 +67,7 @@ pre-push: check-ci check-format check-security ## Run all pre-push checks
 check: format lint ## Format and lint code
 
 run: ## Run the bot locally
-	python run.py
+	$(PYTHON) run.py
 
 new-branch: ## Create a new branch (usage: make new-branch TYPE=feat DESC="description")
 	@if [ -z "$(TYPE)" ] || [ -z "$(DESC)" ]; then \
@@ -100,7 +109,7 @@ db-pgadmin: ## Start pgAdmin web interface
 	./scripts/db-manage.sh pgadmin
 
 test-db: ## Run database tests only
-	PYTHONPATH=project pytest tests/database/ -v
+	PYTHONPATH=project $(VENV)/bin/pytest tests/database/ -v
 
 dev-setup: db-start db-init ## Complete development setup with database
 	@echo "✅ Development environment with database ready!"

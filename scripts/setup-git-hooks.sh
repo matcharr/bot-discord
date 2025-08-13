@@ -21,7 +21,7 @@ echo -e "${GREEN}✅ Hooks configured in .githooks/${NC}"
 
 # 2. Make hooks executable
 echo -e "${YELLOW}🔐 Setting permissions...${NC}"
-chmod +x .githooks/*
+find .githooks -type f -maxdepth 1 -print0 | xargs -0 -r chmod +x
 echo -e "${GREEN}✅ Permissions configured${NC}"
 
 # 3. Install pre-commit if available

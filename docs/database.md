@@ -92,13 +92,37 @@ docker-compose -f docker-compose.dev.yml down -v && docker-compose -f docker-com
 
 ## Environment Variables
 
+### Key Generation
+
+Before setting up your environment, generate secure encryption keys:
+
+```python
+# Generate encryption keys (run this in Python)
+from cryptography.fernet import Fernet
+import base64
+import secrets
+
+# Generate Fernet encryption key
+encryption_key = Fernet.generate_key().decode()
+print(f"ENCRYPTION_KEY={encryption_key}")
+
+# Generate salt and pepper keys (32 bytes each)
+salt_key = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
+pepper_key = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
+print(f"SALT_KEY={salt_key}")
+print(f"PEPPER_KEY={pepper_key}")
+```
+
 ### .env.development
 ```bash
 DATABASE_URL=postgresql://botuser:devpassword@localhost:5432/botdb_dev
-ENCRYPTION_KEY=dev_encryption_key_base64_encoded_here
-SALT_KEY=dev_salt_key_base64_encoded_here
-PEPPER_KEY=dev_pepper_key_base64_encoded_here
+# Generate strong keys for development - never use these examples!
+ENCRYPTION_KEY=<generate_with_cryptography.fernet.Fernet.generate_key()>
+SALT_KEY=<generate_random_base64_32_bytes>
+PEPPER_KEY=<generate_random_base64_32_bytes>
 ```
+
+**⚠️ Security Warning**: Always generate unique keys for each environment. Never use example keys in any environment!
 
 ### .env.production
 ```bash
@@ -111,9 +135,10 @@ PEPPER_KEY=${PEPPER_KEY}
 ### .env.test
 ```bash
 DATABASE_URL=sqlite:///:memory:
-ENCRYPTION_KEY=test_key_for_ci_only
-SALT_KEY=test_salt_for_ci_only
-PEPPER_KEY=test_pepper_for_ci_only
+# Test keys - generate unique ones for your test environment
+ENCRYPTION_KEY=<generate_unique_test_key>
+SALT_KEY=<generate_unique_test_salt>
+PEPPER_KEY=<generate_unique_test_pepper>
 ```
 
 ## Migrations & Schema

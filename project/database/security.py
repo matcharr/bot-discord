@@ -30,8 +30,11 @@ class SecurityManager:
         if not key_str:
             # Generate cryptographically secure key for development
             key = Fernet.generate_key()
-            logger.warning(f"Generated new encryption key: {key.decode()}")
-            logger.warning("Add this to your .env file: ENCRYPTION_KEY=" + key.decode())
+            logger.warning(
+                "Generated new encryption key. Add ENCRYPTION_KEY to your .env file"
+            )
+            # Only show the key in a secure way, not in logs
+            print(f"ENCRYPTION_KEY={key.decode()}")
             return key
 
         # If key is a password, derive it properly
@@ -54,8 +57,8 @@ class SecurityManager:
         if not salt:
             # Generate cryptographically secure salt
             salt = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
-            logger.warning(f"Generated new salt: {salt}")
-            logger.warning("Add this to your .env file: SALT_KEY=" + salt)
+            logger.warning("Generated new salt. Add SALT_KEY to your .env file")
+            print(f"SALT_KEY={salt}")
         return salt
 
     def _get_pepper(self) -> str:
@@ -63,8 +66,8 @@ class SecurityManager:
         pepper = os.getenv("PEPPER_KEY")
         if not pepper:
             pepper = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
-            logger.warning(f"Generated new pepper: {pepper}")
-            logger.warning("Add this to your .env file: PEPPER_KEY=" + pepper)
+            logger.warning("Generated new pepper. Add PEPPER_KEY to your .env file")
+            print(f"PEPPER_KEY={pepper}")
         return pepper
 
     def hash_discord_id(self, discord_id: str) -> str:

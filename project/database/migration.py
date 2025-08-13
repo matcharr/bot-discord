@@ -156,7 +156,7 @@ class WarningMigration:
 
                 db_count = (
                     service.db.query(SecureWarning)
-                    .filter(SecureWarning.is_deleted == False)
+                    .filter(SecureWarning.is_deleted.is_(False))
                     .count()
                 )
                 verification["database_warnings"] = db_count

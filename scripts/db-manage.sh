@@ -47,12 +47,12 @@ check_docker() {
         log_error "Docker is not installed"
         exit 1
     fi
-    
+
     if ! docker compose version &> /dev/null && ! command -v docker-compose &> /dev/null; then
         log_error "Docker Compose is not installed"
         exit 1
     fi
-    
+
     # Use new docker compose syntax if available
     if docker compose version &> /dev/null; then
         DOCKER_COMPOSE="docker compose"
@@ -65,11 +65,11 @@ check_docker() {
 start_db() {
     log_info "Starting PostgreSQL database..."
     $DOCKER_COMPOSE -f $COMPOSE_FILE up -d postgres
-    
+
     log_info "Waiting for database to be ready..."
     TIMEOUT_CMD=$(get_timeout_cmd)
     $TIMEOUT_CMD 30 bash -c 'until '$DOCKER_COMPOSE' -f '$COMPOSE_FILE' exec postgres pg_isready -U botuser -d botdb_dev; do sleep 1; done'
-    
+
     log_success "Database started and ready!"
 }
 
@@ -85,16 +85,16 @@ reset_db() {
     log_warning "⚠️  WARNING: This action will delete ALL development data!"
     read -p "Are you sure? (y/N): " -n 1 -r
     echo
-    
+
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         log_info "Resetting database..."
         $DOCKER_COMPOSE -f $COMPOSE_FILE down -v
         $DOCKER_COMPOSE -f $COMPOSE_FILE up -d postgres
-        
+
         log_info "Waiting for database to be ready..."
         TIMEOUT_CMD=$(get_timeout_cmd)
         $TIMEOUT_CMD 30 bash -c 'until '$DOCKER_COMPOSE' -f '$COMPOSE_FILE' exec postgres pg_isready -U botuser -d botdb_dev; do sleep 1; done'
-        
+
         log_success "Database reset successfully!"
     else
         log_info "Reset cancelled"
@@ -104,12 +104,23 @@ reset_db() {
 # Initialize tables
 init_tables() {
     log_info "Initializing tables..."
-    python3 -c "
-import os
-os.environ['DATABASE_URL'] = 'postgresql://botuser:devpassword@localhost:5432/botdb_dev'
+    init_tables() {
+        log_info "Initializing tables..."
+        # Load DATABASE_URL from environment or .env file
+        if [ -z "$DATABASE_URL" ]; then
+            if [ -f .env.development ]; then
+                export $(grep -v '^#' .env.development | xargs)
+            else
+                log_error "DATABASE_URL not set and .env.development not found"
+                exit 1
+            fi
+        fi
+
+        python3 -c "
 from project.database.connection import init_database
 init_database()
 "
+    }
     log_success "Tables initialized!"
 }
 
@@ -165,7 +176,7 @@ show_help() {
 # Main
 main() {
     check_docker
-    
+
     case "${1:-help}" in
         start)
             start_db

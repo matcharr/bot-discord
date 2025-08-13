@@ -3,7 +3,7 @@
 # Usage: ./scripts/new-branch.sh <type> <description>
 # Example: ./scripts/new-branch.sh feat "add-user-roles"
 
-set -e
+set -euo pipefail
 
 # Colors for display
 RED='\033[0;31m'
@@ -43,10 +43,17 @@ DESCRIPTION=$2
 VALID_TYPES=("feat" "fix" "chore" "docs" "refactor" "test")
 
 # Verify type is valid
-if [[ ! " ${VALID_TYPES[@]} " =~ " ${TYPE} " ]]; then
-    echo -e "${RED}❌ Invalid type: $TYPE${NC}"
-    echo -e "${YELLOW}Valid types: ${VALID_TYPES[*]}${NC}"
-    exit 1
+is_valid=false
+for t in "${VALID_TYPES[@]}"; do
+  if [[ "$t" == "$TYPE" ]]; then
+    is_valid=true
+    break
+  fi
+done
+if [[ "$is_valid" != true ]]; then
+  echo -e "${RED}❌ Invalid type: $TYPE${NC}"
+  echo -e "${YELLOW}Valid types: ${VALID_TYPES[*]}${NC}"
+  exit 1
 fi
 
 # Clean description (replace spaces with dashes, lowercase)

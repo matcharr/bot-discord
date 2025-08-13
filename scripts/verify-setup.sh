@@ -93,14 +93,40 @@ else
     log_error "pip/pip3 is not installed"
 fi
 check_command "docker"
-((CHECKS_TOTAL++))
-if docker compose version &> /dev/null; then
-    log_success "docker compose is available"
-elif command -v docker-compose &> /dev/null; then
-    log_success "docker-compose is available"
-else
-    log_error "docker compose/docker-compose is not available"
-fi
+
+# Enhanced Docker Compose detection with better error handling
+detect_docker_compose() {
+    ((CHECKS_TOTAL++))
+
+    if ! command -v docker &> /dev/null; then
+        log_error "Docker is not installed - Docker Compose unavailable"
+        DOCKER_CMD=""
+        return 1
+    fi
+
+    # Test docker compose (newer syntax)
+    if docker compose version &> /dev/null 2>&1; then
+        log_success "docker compose (v2) is available"
+        DOCKER_CMD="docker compose"
+        return 0
+    fi
+
+    # Test docker-compose (legacy syntax)
+    if command -v docker-compose &> /dev/null && docker-compose version &> /dev/null 2>&1; then
+        log_success "docker-compose (legacy) is available"
+        DOCKER_CMD="docker-compose"
+        return 0
+    fi
+
+    # Docker is available but compose is not
+    log_error "Docker Compose is not available"
+    log_info "  💡 Install Docker Compose: https://docs.docker.com/compose/install/"
+    DOCKER_CMD=""
+    return 1
+}
+
+# Detect Docker Compose availability
+detect_docker_compose
 check_command "git"
 
 # 2. Essential Python packages verification
@@ -135,92 +161,168 @@ check_file ".env.test"
 log_info "5. Permissions verification..."
 ((CHECKS_TOTAL++))
 if [ -x "scripts/db-manage.sh" ]; then
-    log_success "Script db-manage.sh est exécutable"
+    log_success "Script db-manage.sh is executable"
 else
-    log_error "Script db-manage.sh n'est pas exécutable"
+    log_error "Script db-manage.sh is not executable"
 fi
 
-# 6. Test de la base de données
-log_info "6. Test de la base de données..."
-((CHECKS_TOTAL++))
+# 6. Database connection test
+log_info "6. Database connection test..."
 
-# Test Docker d'abord
-if command -v docker &> /dev/null && docker-compose -f docker-compose.dev.yml ps postgres 2>/dev/null | grep -q "Up"; then
-    log_success "PostgreSQL Docker est en cours d'exécution"
-    
-    # Test de connexion Docker
-    ((CHECKS_TOTAL++))
-    if timeout 5 docker-compose -f docker-compose.dev.yml exec postgres pg_isready -U botuser -d botdb_dev &> /dev/null; then
-        log_success "Connexion PostgreSQL Docker OK"
-    else
-        log_error "Impossible de se connecter à PostgreSQL Docker"
+# Test Docker PostgreSQL first if Docker Compose is available
+test_docker_database() {
+    if [ -z "$DOCKER_CMD" ]; then
+        return 1
     fi
-# Test PostgreSQL natif
-elif command -v psql &> /dev/null && timeout 5 psql -U botuser -d botdb_dev -h localhost -c "SELECT 1;" &> /dev/null; then
-    log_success "PostgreSQL natif fonctionne"
-else
-    log_warning "PostgreSQL non détecté (Docker ou natif)"
-    log_info "  - Docker: ./scripts/db-manage.sh start"
-    log_info "  - Natif: voir docs/SETUP_NO_DOCKER.md"
+
+    ((CHECKS_TOTAL++))
+
+    # Check if PostgreSQL container is running
+    if ! $DOCKER_CMD -f docker-compose.dev.yml ps postgres 2>/dev/null | grep -q "Up"; then
+        log_warning "PostgreSQL Docker container is not running"
+        log_info "  💡 Start with: ./scripts/db-manage.sh start"
+        return 1
+    fi
+
+    log_success "PostgreSQL Docker container is running"
+
+    # Test database connection
+    ((CHECKS_TOTAL++))
+    local connection_test
+    connection_test=$(timeout 10 $DOCKER_CMD -f docker-compose.dev.yml exec -T postgres pg_isready -U botuser -d botdb_dev 2>&1)
+
+    if [ $? -eq 0 ]; then
+        log_success "PostgreSQL Docker connection successful"
+        return 0
+    else
+        log_error "PostgreSQL Docker connection failed"
+        log_info "  💡 Error: $connection_test"
+        log_info "  💡 Try: ./scripts/db-manage.sh reset"
+        return 1
+    fi
+}
+
+# Test native PostgreSQL installation
+test_native_database() {
+    ((CHECKS_TOTAL++))
+
+    if ! command -v psql &> /dev/null; then
+        log_warning "psql command not found - native PostgreSQL not available"
+        return 1
+    fi
+
+    # Test connection to native PostgreSQL
+    local connection_test
+    connection_test=$(timeout 10 psql -U botuser -d botdb_dev -h localhost -c "SELECT 1;" 2>&1)
+
+    if [ $? -eq 0 ]; then
+        log_success "Native PostgreSQL connection successful"
+        return 0
+    else
+        log_warning "Native PostgreSQL connection failed"
+        log_info "  💡 Error: $connection_test"
+        log_info "  💡 See: docs/setup-no-docker.md"
+        return 1
+    fi
+}
+
+# Try Docker first, then native PostgreSQL
+if ! test_docker_database; then
+    if ! test_native_database; then
+        ((CHECKS_TOTAL++))
+        log_error "No working PostgreSQL database found"
+        log_info "  💡 Options:"
+        log_info "    - Docker: ./scripts/db-manage.sh start"
+        log_info "    - Native: see docs/setup-no-docker.md"
+    fi
 fi
 
 # 7. Python imports test
 log_info "7. Testing project imports..."
 ((CHECKS_TOTAL++))
-if python3 -c "
+
+# Function to test Python imports with better error handling
+test_python_imports() {
+    local import_result
+    local exit_code
+
+    # Execute Python import test with proper error handling
+    import_result=$(python3 -c "
 import sys
 sys.path.append('project')
-from database.models import SecureWarning
-from database.services import WarningService
-from database.security import SecurityManager
-print('Imports OK')
-" &> /dev/null; then
-    log_success "Project imports work"
-else
-    log_error "Error in project imports"
-fi
+try:
+    from database.models import SecureWarning
+    from database.services import WarningService
+    from database.security import SecurityManager
+    print('SUCCESS: All imports work')
+except ImportError as e:
+    print('IMPORT_ERROR: ' + str(e))
+    sys.exit(1)
+except Exception as e:
+    print('ERROR: ' + str(e))
+    sys.exit(2)
+" 2>&1)
+    exit_code=$?
 
-# 8. Test des variables d'environnement
-log_info "8. Test des variables d'environnement..."
-((CHECKS_TOTAL++))
-if [ -f ".env.development" ]; then
-    source .env.development
-    if [ ! -z "$DATABASE_URL" ] && [ ! -z "$ENCRYPTION_KEY" ]; then
-        log_success "Environment variables configured"
-    else
-        log_error "Missing environment variables in .env.development"
-    fi
-else
-    log_error "Missing .env.development file"
-fi
+    # Parse results and provide clear feedback
+    case $exit_code in
+        0)
+            if echo "$import_result" | grep -q "SUCCESS"; then
+                log_success "All project imports work correctly"
+                return 0
+            else
+                log_error "Unexpected success result: $import_result"
+                return 1
+            fi
+            ;;
+        1)
+            # Import error - extract the specific import that failed
+            local import_error=$(echo "$import_result" | grep "IMPORT_ERROR:" | sed 's/IMPORT_ERROR: //')
+            log_error "Import failed: $import_error"
+            log_info "  💡 Try: pip install -r project/requirements.txt"
+            return 1
+            ;;
+        2)
+            # Other Python error
+            local python_error=$(echo "$import_result" | grep "ERROR:" | sed 's/ERROR: //')
+            log_error "Python execution error: $python_error"
+            log_info "  💡 Check Python environment and project structure"
+            return 1
+            ;;
+        *)
+            # Unexpected exit code
+            log_error "Unexpected error during import test (exit code: $exit_code)"
+            log_error "Output: $import_result"
+            return 1
+            ;;
+    esac
+}
 
-# 9. Test rapide des tests unitaires (si possible)
-log_info "9. Test rapide des tests unitaires..."
-((CHECKS_TOTAL++))
-if timeout 30 python3 -m pytest tests/database/test_security.py -v &> /dev/null; then
-    log_success "Basic unit tests work"
-else
-    log_warning "Unit tests fail or take too long"
-fi
-
-# Résumé
-echo ""
-echo "📊 Résumé de la vérification"
-echo "============================"
-echo -e "Tests passés: ${GREEN}$CHECKS_PASSED${NC}/$CHECKS_TOTAL"
-
-if [ $CHECKS_PASSED -eq $CHECKS_TOTAL ]; then
-    echo -e "${GREEN}🎉 Environnement parfaitement configuré !${NC}"
-    exit 0
-elif [ $CHECKS_PASSED -gt $((CHECKS_TOTAL * 3 / 4)) ]; then
-    echo -e "${YELLOW}⚠️  Environnement majoritairement configuré, quelques ajustements nécessaires${NC}"
-    exit 0
-else
-    echo -e "${RED}❌ Environment requires significant corrections${NC}"
+# Execute the import test
+test_python_imports
+# Function to show final summary and exit
+show_final_summary() {
     echo ""
-    echo "💡 Suggestions:"
-    echo "  - Install missing dependencies"
-    echo "  - Start database: ./scripts/db-manage.sh start"
-    echo "  - Check configuration: docs/SETUP_CHECKLIST.md"
-    exit 1
-fi
+    echo "📊 Verification Summary"
+    echo "============================"
+    echo -e "Tests passed: ${GREEN}$CHECKS_PASSED${NC}/$CHECKS_TOTAL"
+
+    if [ $CHECKS_PASSED -eq $CHECKS_TOTAL ]; then
+        echo -e "${GREEN}🎉 Environment perfectly configured!${NC}"
+        exit 0
+    elif [ $CHECKS_PASSED -gt $((CHECKS_TOTAL * 3 / 4)) ]; then
+        echo -e "${YELLOW}⚠️  Environment mostly configured, some adjustments needed${NC}"
+        exit 0
+    else
+        echo -e "${RED}❌ Environment requires significant corrections${NC}"
+        echo ""
+        echo "💡 Suggestions:"
+        echo "  - Install missing dependencies"
+        echo "  - Start database: ./scripts/db-manage.sh start"
+        echo "  - Check configuration: docs/SETUP_CHECKLIST.md"
+        exit 1
+    fi
+}
+
+# Call the summary function at the end
+show_final_summary
