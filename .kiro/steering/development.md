@@ -1,5 +1,7 @@
 # Development Guidelines
 
+**Current Focus**: Development environment setup and workflow optimization. No production deployment yet.
+
 ## Code Quality Standards (Automated via Hooks)
 - **Auto Quality Check Hook**: Automatically runs `make check-ci` and `make format` on Python file saves
 - **Pre-Commit Hook**: Validates all code before commits (blocks bad commits)
@@ -23,13 +25,11 @@
 
 ## Available Tools & Automation
 
-### Automated Hooks (Recommended Setup)
-- **Auto Quality Check**: Runs on Python file save (formatting + CI checks)
-- **Pre-Commit Validation**: Blocks commits that fail quality standards
-- **Database Schema Check**: Validates schema changes with confirmation prompts (dev/test only, never auto-applies destructive changes)
-- **Dependency Update**: Auto-installs when requirements.txt changes
-- **Branch Cleanup**: Manual button to clean merged branches
-- **Security Audit**: Manual/scheduled comprehensive security scan
+### Automated Hooks (Current Setup)
+- **Python Quality Check**: Runs on Python file save (formatting + CI checks)
+- **Requirements Sync**: Auto-installs when requirements.txt changes
+- **Security Audit**: Runs when security-sensitive files are modified
+- **Pre-Commit Validation**: Handled by `.pre-commit-config.yaml` (not Kiro hooks)
 
 ### Virtual Environment
 - **Automatic activation**: Virtual environment (.venv) auto-activates in project directory
@@ -46,14 +46,13 @@
 
 **⚠️ Database Safety Rules:**
 - Schema changes require explicit confirmation in dev/test environments
-- Production schema changes are NEVER automated
 - Always backup before destructive operations
-- Use migrations for production schema changes
+- Use migrations for schema changes (production readiness for future)
 
 ### Git Workflow (Partially Automated)
 ```bash
 ./scripts/new-branch.sh feat "description"    # Create new branch
-# ./scripts/cleanup-branches.sh               # Now available as hook button
+./scripts/cleanup-branches.sh                 # Clean merged branches (manual)
 ./scripts/verify-setup.sh                     # Verify dev environment
 ```
 
@@ -61,10 +60,10 @@
 ```bash
 # make check-ci          # Auto-runs on file save via hook
 # make format            # Auto-runs on file save via hook
-# make check-security    # Available as manual hook
-make test-db           # Auto-runs when database files change
+# make check-security    # Auto-runs when security files change via hook
+make test-db           # Manual (run when needed)
 make test              # Full test suite (manual)
-make install           # Auto-runs when requirements change
+# make install           # Auto-runs when requirements change via hook
 ```
 
 ## Development Workflow (Hook-Enhanced)
@@ -72,16 +71,16 @@ make install           # Auto-runs when requirements change
 2. **Automated**: Quality checks run on file save, tests run on relevant changes
 3. **Automated**: Pre-commit hook ensures quality before commits
 4. **Automated**: Use hooks for repetitive tasks, scripts for complex operations
-5. **Manual**: Clean up obsolete files when identified (use Branch Cleanup hook)
+5. **Manual**: Clean up obsolete files when identified (use `make cleanup-branches`)
 6. Document architectural decisions
 
 ### Hook-Driven Development
 - Save Python files → Auto quality check + formatting
-- Modify database models → Schema validation + explicit confirmation for any changes (dev/test only, requires backup confirmation for destructive operations)
 - Update requirements → Auto dependency installation
-- Commit code → Auto validation (blocks bad commits)
-- Need cleanup → Click Branch Cleanup hook button
-- Security review → Click Security Audit hook button
+- Modify security files → Auto security audit
+- Commit code → Pre-commit hooks validate (via .pre-commit-config.yaml)
+- Need branch cleanup → Use `make cleanup-branches` or `./scripts/cleanup-branches.sh`
+- Database operations → Manual via `./scripts/db-manage.sh` (safer)
 
 ## Communication & Collaboration
 - Be concise and actionable
