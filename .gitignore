@@ -103,3 +103,8 @@ docker-compose.override.yml
 .docker/
 # Scripts logs
 scripts/*.log
+
+# Kiro AI - ignore personal settings but keep shared config
+.kiro/settings/
+.kiro/cache/
+.kiro/logs/
