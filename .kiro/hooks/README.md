@@ -11,14 +11,12 @@ This directory contains hook configurations that automate your development workf
 ## Hook Categories
 
 ### 🔄 Automatic Hooks (Recommended)
-- **auto-quality-check.md**: Runs quality checks on Python file saves
-- **pre-commit-validation.md**: Validates code before commits
-- **database-sync.md**: Syncs database when models change
-- **dependency-update.md**: Updates dependencies when requirements change
+- **python-quality-check.kiro.hook**: Runs quality checks on Python file saves
+- **requirements-sync-hook.kiro.hook**: Updates dependencies when requirements change
 
 ### 🔘 Manual Hooks (On-Demand)
-- **branch-cleanup.md**: Clean merged branches (button click)
-- **security-audit.md**: Comprehensive security scan (button click)
+- **git-cleanup-button.kiro.hook**: Clean merged branches (button click)
+- **security-audit-button.kiro.hook**: Comprehensive security scan (button click)
 
 ## Benefits of Hook-Driven Development
 
@@ -58,10 +56,11 @@ make check-security
 
 ## Getting Started
 
-1. Enable **Auto Quality Check** first (most impactful)
-2. Add **Pre-Commit Validation** (prevents broken commits)
-3. Enable **Database Sync** if working with database models
-4. Add manual hooks as needed for maintenance tasks
+1. Enable **Python Quality Check** first (most impactful - auto-formats on save)
+2. Add **Requirements Sync** (auto-installs dependencies)
+3. Use manual hooks as needed for maintenance tasks
+
+**Note**: Pre-commit validation is handled by the existing `.pre-commit-config.yaml` setup, not hooks.
 
 ## Customization
 

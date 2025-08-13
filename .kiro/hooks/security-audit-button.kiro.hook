@@ -4,10 +4,7 @@
   "description": "Manual button for comprehensive security auditing of the codebase. When clicked, run make check-security to scan for hardcoded secrets, search for any exposed credentials in the code, and check for proper encryption usage in database models. Show detailed results for manual review.",
   "version": "1",
   "when": {
-    "type": "fileEdited",
-    "patterns": [
-      "MANUAL"
-    ]
+    "type": "manual"
   },
   "then": {
     "type": "askAgent",

@@ -4,10 +4,7 @@
   "description": "Manual button to clean up merged branches and optimize the git repository. Runs cleanup-branches.sh script to remove merged branches, then git gc to optimize the repository, and shows current branch status.",
   "version": "1",
   "when": {
-    "type": "fileEdited",
-    "patterns": [
-      "scripts/cleanup-branches.sh"
-    ]
+    "type": "manual"
   },
   "then": {
     "type": "askAgent",
