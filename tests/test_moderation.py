@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cogs.moderation import Moderation
+from project.cogs.moderation import Moderation
 
 
 class TestModeration:
@@ -36,8 +36,8 @@ class TestModeration:
         assert Moderation.parse_time("30d") == 2592000  # 30 days
         assert Moderation.parse_time("31d") is None  # Over 30 days
 
-    @patch("cogs.moderation.init_database")
-    @patch("cogs.moderation.get_config")
+    @patch("project.cogs.moderation.init_database")
+    @patch("project.cogs.moderation.get_config")
     def test_moderation_cog_initialization(self, mock_get_config, mock_init_db):
         """Test moderation cog initializes with database."""
         mock_bot = MagicMock()
@@ -48,8 +48,8 @@ class TestModeration:
         assert mod.bot == mock_bot
         mock_init_db.assert_called_once()
 
-    @patch("cogs.moderation.init_database")
-    @patch("cogs.moderation.get_config")
+    @patch("project.cogs.moderation.init_database")
+    @patch("project.cogs.moderation.get_config")
     def test_database_service_integration(self, mock_get_config, mock_init_db):
         """Test that moderation cog integrates with database service."""
         mock_bot = MagicMock()
@@ -62,8 +62,8 @@ class TestModeration:
         # Verify bot is properly set
         assert mod.bot == mock_bot
 
-    @patch("cogs.moderation.init_database")
-    @patch("cogs.moderation.get_config")
+    @patch("project.cogs.moderation.init_database")
+    @patch("project.cogs.moderation.get_config")
     def test_database_initialization_failure(self, mock_get_config, mock_init_db):
         """Test moderation cog handles database initialization failure."""
         mock_bot = MagicMock()

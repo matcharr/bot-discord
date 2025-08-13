@@ -4,14 +4,15 @@ import re
 from typing import Optional
 
 import discord
-from config import get_config
-from database.connection import init_database
+from discord.ext import commands
+
+from project.config import get_config
+from project.database.connection import init_database
 
 # Import our secure database system
-from database.services import get_warning_service
-from discord.ext import commands
-from utils.audit import log_moderation_action
-from utils.permissions import validate_hierarchy
+from project.database.services import get_warning_service
+from project.utils.audit import log_moderation_action
+from project.utils.permissions import validate_hierarchy
 
 logger = logging.getLogger(__name__)
 
