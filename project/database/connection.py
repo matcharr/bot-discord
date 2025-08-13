@@ -4,8 +4,7 @@ import os
 from typing import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 # Database URL from environment
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///warnings.db")
@@ -14,7 +13,9 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///warnings.db")
 engine = create_engine(
     DATABASE_URL,
     # SQLite specific settings
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
+    connect_args=(
+        {"check_same_thread": False} if "sqlite" in DATABASE_URL else {}
+    ),
     # PostgreSQL specific settings
     pool_pre_ping=True if "postgresql" in DATABASE_URL else False,
     echo=False,  # Set to True for SQL debugging
