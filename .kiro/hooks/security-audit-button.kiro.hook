@@ -1,10 +1,17 @@
 {
   "enabled": true,
   "name": "Security Audit",
-  "description": "Manual button for comprehensive security auditing of the codebase. When clicked, run make check-security to scan for hardcoded secrets, search for any exposed credentials in the code, and check for proper encryption usage in database models. Show detailed results for manual review.",
+  "description": "Automatically run security audit when security-sensitive files are modified. Scans for hardcoded secrets, exposed credentials, and validates proper encryption usage in database models.",
   "version": "1",
   "when": {
-    "type": "manual"
+    "type": "fileEdited",
+    "patterns": [
+      "project/config.py",
+      "project/database/security.py",
+      "project/database/models.py",
+      ".env*",
+      "project/cogs/*.py"
+    ]
   },
   "then": {
     "type": "askAgent",
