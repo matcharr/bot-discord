@@ -43,6 +43,9 @@ class TestWarningService:
 
     def teardown_method(self):
         """Cleanup after each test."""
+        # Clean up database
+        self.service.db.query(SecureWarning).delete()
+        self.service.db.commit()
         self.service.close()
         self.env_patch.stop()
 

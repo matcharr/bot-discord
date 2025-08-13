@@ -45,7 +45,9 @@ class TestDatabaseModels:
 
     def teardown_method(self):
         """Cleanup after each test."""
-        self.session.rollback()
+        # Clean up database
+        self.session.query(SecureWarning).delete()
+        self.session.commit()
         self.session.close()
         self.env_patch.stop()
 
@@ -164,7 +166,9 @@ class TestDatabaseModels:
 
         # Deleted warning should not include sensitive data
         warning_dict = warning.to_dict()
-        assert warning_dict.get("reason") == ""  # Always include key with empty value
+        assert (
+            "reason" not in warning_dict
+        )  # Sensitive data excluded for deleted warnings
 
     def test_create_moderation_log(self):
         """Test creating moderation log."""
