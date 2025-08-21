@@ -9,16 +9,27 @@ A comprehensive Discord bot with moderation tools, anti-raid protection, and ser
 
 ## Quick Start
 
-1. Install dependencies: `pip install -r project/requirements.txt`
-2. Copy `.env.example` to `.env` and fill in your bot token and report channel ID
-3. Create a "logs" channel in your Discord server
-4. Load all cogs in your main bot file
+1. **Install dependencies**: `pip install -r requirements.txt`
+2. **Setup database**: `./scripts/db-manage.sh start && ./scripts/db-manage.sh init`
+3. **Configure environment**: Copy `.env.development` and update with your bot token
+4. **Create a "logs" channel** in your Discord server
+5. **Run the bot**: `python main.py`
 
 ## Development Setup
 
+### Prerequisites
+- Python 3.11+
+- Docker & Docker Compose
+- Git
+
+### Setup Steps
 ```bash
 # Install development dependencies
 pip install -r requirements-dev.txt
+
+# Setup database (PostgreSQL via Docker)
+./scripts/db-manage.sh start
+./scripts/db-manage.sh init
 
 # Setup Git hooks and workflow tools
 ./scripts/setup-git-hooks.sh
@@ -26,9 +37,32 @@ pip install -r requirements-dev.txt
 # Create a new feature branch
 ./scripts/new-branch.sh feat "your-feature-name"
 
+# Run tests
+python -m pytest
+
 # Format and lint code
 make check
 ```
+
+### Database Management
+```bash
+# Start PostgreSQL
+./scripts/db-manage.sh start
+
+# Stop PostgreSQL
+./scripts/db-manage.sh stop
+
+# Reset database (⚠️ deletes all data)
+./scripts/db-manage.sh reset
+
+# Open PostgreSQL session
+./scripts/db-manage.sh psql
+
+# View logs
+./scripts/db-manage.sh logs
+```
+
+See [docs/DATABASE.md](docs/DATABASE.md) for complete database documentation.
 
 ### Git Workflow
 This project uses a standardized Git workflow with automated tools:
@@ -49,7 +83,7 @@ Automatically detects and kicks spammers (10+ messages triggers kick, 10-second 
 - `/warn @user reason` - Issue warnings (stored in warnings.json)
 - `/warnings @user` - View user warnings
 - `/kick @user reason` - Kick user
-- `/ban @user reason` - Ban user  
+- `/ban @user reason` - Ban user
 - `/unban user#1234` - Unban user
 - `/mute @user reason` - Mute user (creates Muted role)
 - `/tempban @user 1h reason` - Temporary ban (m/h/d)
@@ -71,7 +105,7 @@ Automatically detects and kicks spammers (10+ messages triggers kick, 10-second 
 
 ```
 ✅ Send Messages          ✅ Manage Messages
-✅ Kick Members           ✅ Ban Members  
+✅ Kick Members           ✅ Ban Members
 ✅ Manage Roles           ✅ View Audit Log
 ✅ Embed Links            ✅ Manage Guild
 ```
@@ -90,7 +124,7 @@ Automatically detects and kicks spammers (10+ messages triggers kick, 10-second 
 ```
 project/cogs/
 ├── anti_raid.py      # Spam detection & auto-kick
-├── moderation.py     # Warning/kick/ban/mute commands  
+├── moderation.py     # Warning/kick/ban/mute commands
 ├── logging_system.py # Event logging to #logs
 ├── role_management.py # Role creation & assignment
 ├── invite_management.py # Invite tracking
@@ -100,7 +134,7 @@ project/cogs/
 ## Loading Cogs
 ```python
 # In your main bot file
-cogs = ['anti_raid', 'moderation', 'logging_system', 
+cogs = ['anti_raid', 'moderation', 'logging_system',
         'role_management', 'invite_management', 'reporting']
 
 for cog in cogs:
@@ -110,6 +144,13 @@ for cog in cogs:
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and commit message standards.
+
+## Documentation
+
+- **[Database Setup](docs/database.md)** - Database configuration and management
+- **[Git Workflow](docs/git-workflow.md)** - Git development process
+- **[Setup Checklist](docs/setup-checklist.md)** - Step-by-step setup guide
+- **[Setup without Docker](docs/setup-no-docker.md)** - Alternative setup method
 
 ## Project Structure
 ```

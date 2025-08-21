@@ -1,0 +1,33 @@
+# markdownlint configuration for Discord bot project
+default: true
+
+# Line length - be more lenient for technical docs
+MD013:
+  line_length: 120
+  code_blocks: false
+  tables: false
+  headings: false
+
+# Allow inline HTML (useful for badges, etc.)
+MD033: false
+
+# Allow duplicate headings (common in changelogs)
+MD024:
+  allow_different_nesting: true
+
+# Allow bare URLs (useful for quick references)
+MD034: false
+
+# Allow emphasis used instead of headings
+MD036: false
+
+# Allow multiple spaces after list marker
+MD030:
+  ul_single: 1
+  ol_single: 1
+  ul_multi: 1
+  ol_multi: 1
+
+# Allow trailing punctuation in headings
+MD026:
+  punctuation: ".,;:!"

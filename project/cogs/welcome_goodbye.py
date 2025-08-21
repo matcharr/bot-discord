@@ -11,7 +11,7 @@ class WelcomeGoodBye(commands.Cog):
         channel = member.guild.system_channel
         if channel is not None:
             await channel.send(
-                f"Welcome to our server, {member.mention}! We hope you enjoy your stay."
+                f"Welcome to our server, {member.mention}! We hope you enjoy your stay.",
             )
 
     @commands.Cog.listener()
@@ -20,7 +20,7 @@ class WelcomeGoodBye(commands.Cog):
         channel = member.guild.system_channel
         if channel is not None:
             await channel.send(
-                f"{member.name} has left the server. We hope to see you again."
+                f"{member.name} has left the server. We hope to see you again.",
             )
 
 

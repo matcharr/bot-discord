@@ -1,75 +1,80 @@
 #!/bin/bash
-# Script pour nettoyer les branches Git obsolètes
+# Script to clean up obsolete Git branches
 # Usage: ./scripts/cleanup-branches.sh
 
-set -e
+set -euo pipefail
 
-# Couleurs pour l'affichage
-RED='\033[0;31m'
+# Colors for display
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🧹 Nettoyage des branches Git${NC}"
+echo -e "${BLUE}🧹 Git Branch Cleanup${NC}"
 echo ""
 
-# 1. Nettoyer les références distantes
-echo -e "${YELLOW}🔄 Nettoyage des références distantes obsolètes...${NC}"
-PRUNED=$(git remote prune origin 2>&1)
-if echo "$PRUNED" | grep -q "pruned"; then
-    echo "$PRUNED" | grep "pruned" | wc -l | xargs -I {} echo -e "${GREEN}✅ {} références distantes supprimées${NC}"
+# 1. Clean remote references
+echo -e "${YELLOW}🔄 Cleaning obsolete remote references...${NC}"
+if git remote get-url origin >/dev/null 2>&1; then
+    PRUNED=$(git remote prune origin 2>&1)
+    if echo "$PRUNED" | grep -q "pruned"; then
+        PRUNED_COUNT=$(echo "$PRUNED" | grep -c "pruned")
+        echo -e "${GREEN}✅ $PRUNED_COUNT remote references removed${NC}"
+    else
+        echo -e "${GREEN}✅ No obsolete references found${NC}"
+    fi
 else
-    echo -e "${GREEN}✅ Aucune référence obsolète trouvée${NC}"
+    echo -e "${YELLOW}⚠️  No remote origin configured${NC}"
 fi
 echo ""
 
-# 2. Afficher les branches locales mergées
-echo -e "${YELLOW}📋 Branches locales mergées dans main :${NC}"
-MERGED_BRANCHES=$(git branch --merged main | grep -v "main" | grep -v "\*" | sed 's/^[ ]*//')
+# 2. Show merged local branches
+DEFAULT_BRANCH=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's@^origin/@@' || echo "main")
+echo -e "${YELLOW}📋 Local branches merged into ${DEFAULT_BRANCH}:${NC}"
+MERGED_BRANCHES=$(git branch --merged "${DEFAULT_BRANCH}" | grep -v "${DEFAULT_BRANCH}" | grep -v "\*" | sed 's/^[ ]*//' || true)
 if [ -z "$MERGED_BRANCHES" ]; then
-    echo -e "${GREEN}✅ Aucune branche locale mergée à supprimer${NC}"
+    echo -e "${GREEN}✅ No merged local branches to delete${NC}"
 else
-    echo "$MERGED_BRANCHES" | while read branch; do
+    echo "$MERGED_BRANCHES" | while read -r branch; do
         echo -e "  ${YELLOW}📌 $branch${NC}"
     done
     echo ""
-    
-    # Demander confirmation
-    echo -e "${YELLOW}❓ Voulez-vous supprimer ces branches ? (y/N)${NC}"
+
+    # Ask for confirmation
+    echo -e "${YELLOW}❓ Do you want to delete these branches? (y/N)${NC}"
     read -r response
     if [[ "$response" =~ ^[Yy]$ ]]; then
-        echo "$MERGED_BRANCHES" | while read branch; do
+        echo "$MERGED_BRANCHES" | while read -r branch; do
             git branch -d "$branch"
-            echo -e "${GREEN}✅ Branche $branch supprimée${NC}"
+            echo -e "${GREEN}✅ Branch $branch deleted${NC}"
         done
     else
-        echo -e "${BLUE}ℹ️  Branches conservées${NC}"
+        echo -e "${BLUE}ℹ️  Branches kept${NC}"
     fi
 fi
 echo ""
 
-# 3. Afficher les branches distantes Dependabot restantes
-echo -e "${YELLOW}🤖 Branches Dependabot restantes sur GitHub :${NC}"
-DEPENDABOT_BRANCHES=$(git branch -r | grep "dependabot" | sed 's/^[ ]*//')
+# 3. Show remaining Dependabot remote branches
+echo -e "${YELLOW}🤖 Remaining Dependabot branches on GitHub:${NC}"
+DEPENDABOT_BRANCHES=$(git branch -r | grep "dependabot" | sed 's/^[ ]*//' || true)
 if [ -z "$DEPENDABOT_BRANCHES" ]; then
-    echo -e "${GREEN}✅ Aucune branche Dependabot restante${NC}"
+    echo -e "${GREEN}✅ No remaining Dependabot branches${NC}"
 else
-    echo "$DEPENDABOT_BRANCHES" | while read branch; do
+    echo "$DEPENDABOT_BRANCHES" | while read -r branch; do
         echo -e "  ${YELLOW}🤖 $branch${NC}"
     done
     echo ""
-    echo -e "${BLUE}ℹ️  Ces branches peuvent être fermées manuellement sur GitHub${NC}"
+    echo -e "${BLUE}ℹ️  These branches can be closed manually on GitHub${NC}"
 fi
 echo ""
 
-# 4. Résumé final
-echo -e "${BLUE}📊 Résumé des branches actuelles :${NC}"
-echo -e "${GREEN}Branches locales :${NC}"
+# 4. Final summary
+echo -e "${BLUE}📊 Current branch summary:${NC}"
+echo -e "${GREEN}Local branches:${NC}"
 git branch | sed 's/^/  /'
 echo ""
-echo -e "${GREEN}Branches distantes actives :${NC}"
-git branch -r | grep -v "dependabot" | sed 's/^/  /'
+echo -e "${GREEN}Active remote branches:${NC}"
+git branch -r | grep -v "dependabot" | sed 's/^/  /' || true
 
 echo ""
-echo -e "${GREEN}🎉 Nettoyage terminé !${NC}"
+echo -e "${GREEN}🎉 Cleanup completed!${NC}"

@@ -1,21 +1,17 @@
 """Permission validation utilities."""
 
-from typing import List
-
 import discord
 from discord.ext import commands
 
 
-def check_bot_permissions(required_perms: List[str]):
+def check_bot_permissions(required_perms: list[str]):
     """Decorator to check if bot has required permissions."""
 
     async def predicate(ctx):
         bot_perms = ctx.channel.permissions_for(ctx.guild.me)
-        missing_perms = []
-
-        for perm in required_perms:
-            if not getattr(bot_perms, perm, False):
-                missing_perms.append(perm)
+        missing_perms = [
+            perm for perm in required_perms if not getattr(bot_perms, perm, False)
+        ]
 
         if missing_perms:
             await ctx.send(f"❌ I'm missing permissions: {', '.join(missing_perms)}")

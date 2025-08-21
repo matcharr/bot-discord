@@ -1,0 +1,24 @@
+{
+  "enabled": true,
+  "name": "Security Audit",
+  "description": "Automatically run security audit when security-sensitive files are modified. Scans for hardcoded secrets, exposed credentials, and validates proper encryption usage in database models.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "project/config.py",
+      "project/database/security.py",
+      "project/database/models.py",
+      ".env*",
+      "project/cogs/*.py",
+      "project/utils/*.py",
+      "requirements*.txt",
+      "Dockerfile*",
+      "docker-compose*.yml"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run a comprehensive security audit of the codebase by executing `make check-security`. Scan for:\n\n1. Hardcoded secrets, API keys, tokens, or passwords in all files\n2. Exposed credentials in configuration files, environment files, or code\n3. Proper encryption usage in database models (project/database/models.py)\n4. Security vulnerabilities in authentication and authorization code\n5. Insecure data handling patterns in the codebase\n6. Check that sensitive data is properly encrypted using the security utilities\n\nFocus on these critical areas:\n- project/config.py - Configuration and environment variable handling\n- project/database/models.py - Database models with encryption\n- project/database/security.py - Security utilities and encryption functions\n- .env files - Environment variable security\n- project/cogs/ - All cog files for credential exposure\n- project/utils/ - Utility functions handling sensitive data\n\nProvide detailed results with:\n- Specific file locations and line numbers for any issues found\n- Severity assessment (Critical/High/Medium/Low)\n- Recommended fixes for each security issue\n- Confirmation of proper encryption usage where expected\n- Overall security posture assessment\n\nPresent results in a clear, actionable format for manual review and remediation."
+  }
+}

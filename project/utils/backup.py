@@ -1,11 +1,10 @@
 """Backup utilities for bot data."""
 
-
 import logging
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+
 
 logger = logging.getLogger(__name__)
 
@@ -14,13 +13,15 @@ class BackupManager:
     """Manages backups of bot data files."""
 
     def __init__(
-        self, data_dir: Path = Path("data"), backup_dir: Path = Path("backups")
+        self,
+        data_dir: Path = Path("data"),
+        backup_dir: Path = Path("backups"),
     ):
         self.data_dir = data_dir
         self.backup_dir = backup_dir
         self.backup_dir.mkdir(exist_ok=True)
 
-    def create_backup(self, filename: str) -> Optional[Path]:
+    def create_backup(self, filename: str) -> Path | None:
         """Create a timestamped backup of a data file."""
         source_file = self.data_dir / filename
 
@@ -36,8 +37,8 @@ class BackupManager:
             shutil.copy2(source_file, backup_path)
             logger.info(f"Created backup: {backup_path}")
             return backup_path
-        except Exception as e:
-            logger.error(f"Failed to create backup: {e}")
+        except Exception:
+            logger.exception("Failed to create backup")
             return None
 
     def restore_backup(self, backup_filename: str, target_filename: str) -> bool:
@@ -53,8 +54,8 @@ class BackupManager:
             shutil.copy2(backup_path, target_path)
             logger.info(f"Restored backup from {backup_path} to {target_path}")
             return True
-        except Exception as e:
-            logger.error(f"Failed to restore backup: {e}")
+        except Exception:
+            logger.exception("Failed to restore backup")
             return False
 
     def list_backups(self, filename_pattern: str = "*") -> list:
@@ -73,8 +74,8 @@ class BackupManager:
             try:
                 backup.unlink()
                 logger.info(f"Removed old backup: {backup}")
-            except Exception as e:
-                logger.error(f"Failed to remove backup {backup}: {e}")
+            except Exception:
+                logger.exception(f"Failed to remove backup {backup}")
 
 
 # Global backup manager instance

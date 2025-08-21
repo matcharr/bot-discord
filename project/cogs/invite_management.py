@@ -1,7 +1,7 @@
 import logging
 
-
 from discord.ext import commands
+
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +44,8 @@ class InviteManagement(commands.Cog):
             # Here, you can store `used_invite` data somewhere or do something with it
             logger.info(f"{member.name} used invite {used_invite.url}")
 
-        except Exception as e:
-            logger.error(f"Error tracking invite usage: {e}")
+        except Exception:
+            logger.exception("Error tracking invite usage")
 
 
 async def setup(bot):

@@ -1,23 +1,23 @@
 # Git Workflow Guide
 
-Ce document décrit le workflow Git standardisé pour ce projet.
+This document describes the standardized Git workflow for this project.
 
-## 🌿 Convention de nommage des branches
+## 🌿 Branch Naming Convention
 
 ### Format
-```
-type/description-en-kebab-case
+```text
+type/description-in-kebab-case
 ```
 
-### Types disponibles
-- `feat/` - Nouvelles fonctionnalités
-- `fix/` - Corrections de bugs
-- `chore/` - Maintenance, dépendances, configuration
+### Available Types
+- `feat/` - New features
+- `fix/` - Bug fixes
+- `chore/` - Maintenance, dependencies, configuration
 - `docs/` - Documentation
-- `refactor/` - Refactoring de code
-- `test/` - Ajout/modification de tests
+- `refactor/` - Code refactoring
+- `test/` - Adding/modifying tests
 
-### Exemples
+### Examples
 ```bash
 feat/discord-slash-commands
 fix/memory-leak-moderation
@@ -27,45 +27,45 @@ refactor/config-system
 test/moderation-coverage
 ```
 
-## 🚀 Créer une nouvelle branche
+## 🚀 Creating a New Branch
 
-### Méthode automatique (recommandée)
+### Automatic Method (Recommended)
 ```bash
 ./scripts/new-branch.sh feat "add-user-roles"
 ./scripts/new-branch.sh fix "memory-leak-issue"
 ```
 
-### Méthode manuelle
+### Manual Method
 ```bash
-# 1. Aller sur main et mettre à jour
+# 1. Switch to main and update
 git checkout main
 git pull origin main
 
-# 2. Créer la nouvelle branche
-git checkout -b feat/ma-nouvelle-fonctionnalite
+# 2. Create the new branch
+git checkout -b feat/my-new-feature
 ```
 
-## 📝 Convention de commits
+## 📝 Commit Convention
 
 ### Format
-```
+```text
 type(scope): description
 
-body (optionnel)
+body (optional)
 
-footer (optionnel)
+footer (optional)
 ```
 
 ### Types
-- `feat` - Nouvelle fonctionnalité
-- `fix` - Correction de bug
+- `feat` - New feature
+- `fix` - Bug fix
 - `docs` - Documentation
-- `style` - Formatage, style
+- `style` - Formatting, style
 - `refactor` - Refactoring
 - `test` - Tests
 - `chore` - Maintenance
 
-### Exemples
+### Examples
 ```bash
 feat(auth): add user login functionality
 fix(moderation): resolve memory leak in warning system
@@ -73,93 +73,93 @@ docs: update README with setup instructions
 chore(deps): update discord.py to v2.3.2
 ```
 
-## 🔄 Workflow complet
+## 🔄 Complete Workflow
 
-### 1. Créer une branche
+### 1. Create a Branch
 ```bash
-./scripts/new-branch.sh feat "ma-fonctionnalite"
+./scripts/new-branch.sh feat "my-feature"
 ```
 
-### 2. Développer
+### 2. Develop
 ```bash
-# Faire vos modifications
+# Make your changes
 git add .
 git commit -m "feat(scope): description"
 ```
 
-### 3. Pousser et créer PR
+### 3. Push and Create PR
 ```bash
-git push -u origin feat/ma-fonctionnalite
-# Créer une Pull Request sur GitHub
+git push -u origin feat/my-feature
+# Create a Pull Request on GitHub
 ```
 
-### 4. Après merge
+### 4. After Merge
 ```bash
 git checkout main
 git pull origin main
-git branch -d feat/ma-fonctionnalite  # Supprimer la branche locale
+git branch -d feat/my-feature  # Delete local branch
 ```
 
-## 🛡️ Hooks Git
+## 🛡️ Git Hooks
 
-### Hooks actifs
-- **commit-msg**: Valide le format des messages de commit
-- **pre-push**: Valide le nom des branches avant push
+### Active Hooks
+- **commit-msg**: Validates commit message format
+- **pre-push**: Validates branch names before push
 
-### Activer les hooks
+### Enable Hooks
 ```bash
 git config core.hooksPath .githooks
 ```
 
-## 🚫 Branches interdites
+## 🚫 Forbidden Branches
 
-Ces noms de branches sont **interdits** :
-- `nouvelle-branche`
+These branch names are **forbidden**:
+- `new-branch`
 - `test-branch`
 - `temp`
 - `wip`
-- Tout nom sans préfixe type/
+- Any name without type/ prefix
 
-## 🧹 Nettoyage des branches
+## 🧹 Branch Cleanup
 
-### Script automatique
+### Automatic Script
 ```bash
 ./scripts/cleanup-branches.sh
 ```
 
-### Commandes manuelles
+### Manual Commands
 ```bash
-# Nettoyer les références distantes
+# Clean remote references
 git remote prune origin
 
-# Voir les branches locales mergées
+# View merged local branches
 git branch --merged main
 
-# Supprimer les branches locales mergées (sauf main)
+# Delete merged local branches (except main)
 git branch --merged main | grep -v "main" | xargs -n 1 git branch -d
 ```
 
-## 💡 Conseils
+## 💡 Tips
 
-### Noms de branches
-- Utilisez des tirets, pas d'underscores
-- Tout en minuscules
-- Soyez descriptifs mais concis
-- Évitez les caractères spéciaux
+### Branch Names
+- Use dashes, not underscores
+- All lowercase
+- Be descriptive but concise
+- Avoid special characters
 
-### Messages de commit
-- Utilisez l'impératif ("add" pas "added")
-- Première ligne max 50 caractères
-- Soyez spécifiques sur le scope
-- Expliquez le "pourquoi" dans le body si nécessaire
+### Commit Messages
+- Use imperative mood ("add" not "added")
+- First line max 50 characters
+- Be specific about scope
+- Explain the "why" in the body if necessary
 
 ### Pull Requests
-- Titre descriptif
-- Description claire des changements
-- Lier les issues concernées
-- Demander une review si nécessaire
+- Descriptive title
+- Clear description of changes
+- Link related issues
+- Request review if necessary
 
-### Maintenance régulière
-- Nettoyez les branches après chaque merge
-- Utilisez `./scripts/cleanup-branches.sh` régulièrement
-- Fermez les PRs Dependabot obsolètes sur GitHub
+### Regular Maintenance
+- Clean branches after each merge
+- Use `./scripts/cleanup-branches.sh` regularly
+- Close obsolete Dependabot PRs on GitHub

@@ -1,0 +1,336 @@
+# Ruff configuration for Discord bot project
+# Optimized for comprehensive code quality, security, and maintainability
+#
+# This configuration enables 174+ rules across multiple categories:
+# - Code quality and style (pycodestyle, pyflakes, bugbear)
+# - Security scanning (bandit rules)
+# - Performance optimization (perflint)
+# - Modern Python practices (pyupgrade, comprehensions)
+# - Documentation quality (pydocstyle)
+# - Import organization (isort)
+# - Type checking support (annotations, type-checking)
+#
+# Test files and scripts have relaxed rules for practical development
+
+target-version = "py311"
+line-length = 88
+indent-width = 4
+
+# Exclude generated files and cache directories
+exclude = [
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+    "build",
+    "dist",
+    "*.egg-info",
+    "logs/*.log",
+    "project/logs/*.log",
+]
+
+[lint]
+# Comprehensive rule selection for high code quality
+select = [
+    # pycodestyle (errors and warnings)
+    "E", "W",
+    # Pyflakes
+    "F",
+    # pyupgrade (modernize Python syntax)
+    "UP",
+    # flake8-bugbear (likely bugs and design problems)
+    "B",
+    # flake8-simplify (simplification suggestions)
+    "SIM",
+    # isort (import sorting)
+    "I",
+    # flake8-comprehensions (better list/dict/set comprehensions)
+    "C4",
+    # flake8-unused-arguments
+    "ARG",
+    # flake8-use-pathlib (prefer pathlib over os.path)
+    "PTH",
+    # flake8-pie (miscellaneous improvements)
+    "PIE",
+    # flake8-pytest-style (pytest best practices)
+    "PT",
+    # flake8-return (return statement improvements)
+    "RET",
+    # flake8-self (private member access)
+    "SLF",
+    # tryceratops (exception handling best practices)
+    "TRY",
+    # perflint (performance improvements)
+    "PERF",
+    # Ruff-specific rules
+    "RUF",
+    # flake8-annotations (type annotations)
+    "ANN",
+    # flake8-async (async/await best practices)
+    "ASYNC",
+    # flake8-bandit (security testing)
+    "S",
+    # flake8-boolean-trap (boolean trap detection)
+    "FBT",
+    # flake8-commas (trailing commas)
+    "COM",
+    # flake8-datetimez (datetime timezone awareness)
+    "DTZ",
+    # flake8-errmsg (error message best practices)
+    "EM",
+    # flake8-executable (executable file issues)
+    "EXE",
+    # flake8-implicit-str-concat (string concatenation)
+    "ISC",
+    # flake8-import-conventions (import naming conventions)
+    "ICN",
+    # flake8-logging-format (logging best practices)
+    "G",
+    # flake8-no-pep420 (explicit __init__.py)
+    "INP",
+    # flake8-print (print statement detection)
+    "T20",
+    # flake8-pyi (type stub files)
+    "PYI",
+    # flake8-quotes (quote consistency)
+    "Q",
+    # flake8-raise (raise statement improvements)
+    "RSE",
+    # flake8-slots (__slots__ usage)
+    "SLOT",
+    # flake8-tidy-imports (import organization)
+    "TID",
+    # flake8-type-checking (TYPE_CHECKING imports)
+    "TCH",
+    # pylint (comprehensive static analysis)
+    "PL",
+    # pycodestyle (additional style checks)
+    "N",
+    # pydocstyle (docstring conventions)
+    "D",
+    # eradicate (commented-out code)
+    "ERA",
+    # pandas-vet (pandas best practices)
+    "PD",
+    # pygrep-hooks (simple regex-based checks)
+    "PGH",
+    # flake8-future-annotations (future annotations)
+    "FA",
+]
+
+ignore = [
+    # Allow non-abstract empty methods in abstract base classes
+    "B027",
+    # Allow boolean positional values in function calls, like `dict.get(... True)`
+    "FBT003",
+    # Security: Allow hardcoded passwords in config (handled by environment variables)
+    "S105", "S106", "S107",
+    # Security: Allow subprocess calls (needed for database management scripts)
+    "S603", "S607", "S602",
+    # Security: Allow shell=True in subprocess (needed for shell scripts)
+    "S602",
+    # Complexity: Allow reasonable complexity for Discord bot handlers
+    "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+    # Allow print statements in scripts and debugging
+    "T201", "T203",
+    # Documentation: Allow missing docstrings for simple functions
+    "D100", "D101", "D102", "D103", "D104", "D105", "D107",
+    # Documentation: Allow imperative mood in docstrings
+    "D401",
+    # Note: ANN101, ANN102 removed as they're deprecated
+    # Annotations: Allow Any type annotations (needed for Discord.py)
+    "ANN401",
+    # Allow magic values in configuration and constants
+    "PLR2004",
+    # Allow too many arguments for Discord command handlers
+    "PLR0913",
+    # Allow broad exception catching for error handling
+    "BLE001",
+    # Allow long messages in exceptions
+    "TRY003",
+    # Allow raise without from in exception handlers (remapped to B904)
+    "B904",
+    # Allow string formatting in logging (performance not critical)
+    "G002", "G003", "G004",
+    # Allow relative imports within project
+    "TID252",
+    # Allow TODO comments (tracked separately)
+    "FIX002", "TD002", "TD003",
+    # Allow implicit string concatenation for SQL queries
+    "ISC001",
+    # Allow mutable default arguments for Discord.py commands
+    "B006",
+    # Type annotations: Allow missing annotations for legacy code
+    "ANN001", "ANN201", "ANN202", "ANN204", "ANN205",
+    # Exception handling: Allow string literals in exceptions
+    "EM101", "EM102",
+    # Control flow: Allow statements in try blocks
+    "TRY300",
+    # Global statements: Allow global usage (needed for bot state)
+    "PLW0603",
+    # Environment variables: Allow non-string defaults
+    "PLW1508",
+    # Boolean arguments: Allow boolean parameters
+    "FBT001", "FBT002",
+    # Datetime: Allow timezone-naive datetime usage
+    "DTZ003", "DTZ005", "DTZ006",
+    # Executable: Allow non-executable files with shebangs
+    "EXE001",
+    # Documentation: Allow missing blank lines in docstrings
+    "D205",
+    # Unicode: Allow ambiguous characters in strings
+    "RUF001",
+    # Line length: Allow long lines (handled by formatter)
+    "E501",
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[lint.per-file-ignores]
+# Tests: Allow test-specific patterns
+"tests/**/*" = [
+    # Allow magic values in tests
+    "PLR2004",
+    # Allow assert statements in tests
+    "S101",
+    # Allow relative imports in tests
+    "TID252",
+    # Allow missing docstrings in tests
+    "D100", "D101", "D102", "D103", "D104",
+    # Allow missing type annotations in tests
+    "ANN001", "ANN002", "ANN003", "ANN201", "ANN202", "ANN205", "ANN206",
+    # Allow unused arguments in test fixtures
+    "ARG001", "ARG002",
+    # Allow broad exception catching in tests
+    "BLE001", "PT011",
+    # Allow print statements in tests for debugging
+    "T201",
+    # Allow long lines in test data
+    "E501",
+    # Allow complex test functions
+    "PLR0915",
+    # Allow many local variables in tests
+    "PLR0914",
+    # Allow boolean positional arguments in tests
+    "FBT001", "FBT002", "FBT003",
+    # Allow hardcoded secrets in test data
+    "S105", "S106", "S107",
+    # Allow subprocess calls in integration tests
+    "S603", "S607",
+]
+
+# Scripts: Allow script-specific patterns
+"scripts/**/*" = [
+    # Allow print statements in scripts
+    "T201", "T203",
+    # Allow subprocess calls
+    "S603", "S607", "S602",
+    # Allow missing docstrings in scripts
+    "D100", "D101", "D102", "D103", "D104",
+    # Allow missing type annotations in scripts
+    "ANN001", "ANN002", "ANN003", "ANN201", "ANN202", "ANN205", "ANN206",
+    # Allow magic values in scripts
+    "PLR2004",
+    # Allow sys.exit in scripts
+    "PLR1722",
+    # Allow broad exception catching in scripts
+    "BLE001",
+]
+
+# Configuration files: Allow missing docstrings and type annotations
+"project/config.py" = [
+    "D100", "D101", "D102", "D103", "D104",
+    "ANN001", "ANN002", "ANN003", "ANN201", "ANN202",
+]
+
+# Main entry point: Allow missing docstrings
+"project/main.py" = [
+    "D100", "D101", "D102", "D103", "D104",
+]
+
+# Database models: Allow many arguments in constructors
+"project/database/models.py" = [
+    "PLR0913",  # Too many arguments
+]
+
+# Security module: Allow cryptographic operations
+"project/database/security.py" = [
+    "S324",  # Insecure hash function (we use it appropriately)
+    "S311",  # Pseudo-random generators (we use secrets where needed)
+]
+
+[lint.isort]
+known-first-party = ["project"]
+force-single-line = false
+lines-after-imports = 2
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder"
+]
+
+[lint.flake8-annotations]
+# Allow missing return type annotations for __init__ methods
+mypy-init-return = true
+# Suppress ANN000-level violations for arguments matching these names
+suppress-dummy-args = true
+
+[lint.flake8-bandit]
+# Security: Check for hardcoded passwords but allow test patterns
+check-typed-exception = true
+
+[lint.flake8-bugbear]
+# Allow zip() without strict parameter (Python 3.10+ feature)
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+
+[lint.flake8-pytest-style]
+# Configure pytest style checking
+fixture-parentheses = false
+mark-parentheses = false
+parametrize-names-type = "tuple"
+parametrize-values-type = "tuple"
+parametrize-values-row-type = "tuple"
+
+[lint.flake8-quotes]
+# Use double quotes to match Black formatting
+inline-quotes = "double"
+multiline-quotes = "double"
+docstring-quotes = "double"
+avoid-escape = true
+
+[lint.flake8-tidy-imports]
+# Ban certain imports to encourage better practices
+ban-relative-imports = "parents"
+
+[lint.pydocstyle]
+# Use Google docstring convention
+convention = "google"
+
+[lint.pylint]
+# Allow reasonable complexity for Discord bot handlers
+max-args = 8
+max-branches = 15
+max-returns = 8
+max-statements = 60

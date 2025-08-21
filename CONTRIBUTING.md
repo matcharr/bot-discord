@@ -42,6 +42,10 @@ chore: update dependencies for security patches
 
 ## Code Standards
 
+### Language Policy
+**IMPORTANT**: Use English for all code, comments, docstrings, documentation, commit messages, PR descriptions, and issue titles. This policy applies to developer-facing artifacts; user-facing content (e.g., UI strings, bot responses) may be localized as needed.
+
+
 ### Python
 - Follow PEP 8
 - Use type hints where possible

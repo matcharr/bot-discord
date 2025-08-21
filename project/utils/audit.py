@@ -1,10 +1,11 @@
 """Audit logging for security events."""
 
+import contextlib
 import logging
 from datetime import datetime
-from typing import Optional
 
 import discord
+
 
 audit_logger = logging.getLogger("audit")
 
@@ -13,11 +14,10 @@ async def log_moderation_action(
     action: str,
     moderator: discord.Member,
     target: discord.Member,
-    reason: Optional[str] = None,
-    guild: Optional[discord.Guild] = None,
+    reason: str | None = None,
+    guild: discord.Guild | None = None,
 ):
     """Log moderation actions for audit trail."""
-
     log_entry = {
         "timestamp": datetime.utcnow().isoformat(),
         "action": action,
@@ -42,7 +42,5 @@ async def log_moderation_action(
             embed.add_field(name="Target", value=target.mention, inline=True)
             embed.add_field(name="Reason", value=reason or "No reason", inline=False)
 
-            try:
+            with contextlib.suppress(discord.Forbidden):
                 await audit_channel.send(embed=embed)
-            except discord.Forbidden:
-                pass  # Fail silently if no permissions

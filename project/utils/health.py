@@ -2,9 +2,9 @@
 
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 
 import discord
+
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class HealthChecker:
         self.start_time = datetime.utcnow()
         self.command_count = 0
         self.error_count = 0
-        self.last_errors: List[str] = []
+        self.last_errors: list[str] = []
         self.max_error_history = 10
 
     def record_command(self):
@@ -37,7 +37,7 @@ class HealthChecker:
         """Get bot uptime."""
         return datetime.utcnow() - self.start_time
 
-    def get_health_status(self) -> Dict:
+    def get_health_status(self) -> dict:
         """Get comprehensive health status."""
         uptime = self.get_uptime()
 
@@ -64,7 +64,9 @@ class HealthChecker:
         )
 
         embed = discord.Embed(
-            title="🏥 Bot Health Status", color=color, timestamp=datetime.utcnow()
+            title="🏥 Bot Health Status",
+            color=color,
+            timestamp=datetime.utcnow(),
         )
 
         embed.add_field(
@@ -82,7 +84,9 @@ class HealthChecker:
         embed.add_field(name="Users", value=str(status["users"]), inline=True)
 
         embed.add_field(
-            name="Commands", value=str(status["commands_executed"]), inline=True
+            name="Commands",
+            value=str(status["commands_executed"]),
+            inline=True,
         )
 
         if status["errors"] > 0:
@@ -99,4 +103,4 @@ class HealthChecker:
 
 
 # Global health checker instance (will be initialized in main.py)
-health_checker: Optional[HealthChecker] = None
+health_checker: HealthChecker | None = None

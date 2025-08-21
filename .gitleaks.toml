@@ -1,0 +1,73 @@
+# Gitleaks configuration for Discord bot security scanning
+title = "Discord Bot Security Configuration"
+
+[extend]
+# Use default gitleaks rules as base
+useDefault = true
+
+[[rules]]
+description = "Discord Bot Token"
+id = "discord-bot-token"
+regex = '''[MN][A-Za-z\d]{23}\.[\w-]{6}\.[\w-]{27}'''
+tags = ["discord", "token"]
+
+[[rules]]
+description = "Discord Webhook URL"
+id = "discord-webhook"
+regex = '''https://discord(app)?\.com/api/webhooks/\d+/[\w-]+'''
+tags = ["discord", "webhook"]
+
+[[rules]]
+description = "PostgreSQL Connection String"
+id = "postgresql-connection"
+regex = '''postgres(ql)?://[^\s]+'''
+tags = ["database", "postgresql"]
+
+# Global allowlist
+[allowlist]
+description = "Global allowlist for false positives"
+regexes = [
+    # Example tokens in documentation
+    '''BOT_TOKEN=your_bot_token_here''',
+    '''BOT_TOKEN=\$\{\{ secrets\.BOT_TOKEN \}\}''',
+    '''your_bot_token_here''',
+    '''example_token''',
+    '''test_token''',
+    # Environment variable examples
+    '''ENCRYPTION_KEY=your_encryption_key''',
+    '''SALT_KEY=your_salt_key''',
+    '''PEPPER_KEY=your_pepper_key''',
+    # Test keys (clearly marked as test)
+    '''test_key_\d+''',
+    '''test_salt_\d+''',
+    '''test_pepper_\d+''',
+    '''dGVzdF9.*''',  # Base64 encoded test keys
+    # Development database connections (clearly dev/test)
+    '''postgres://botuser:(devpassword|testpassword)@localhost:5432/botdb_(dev|test)''',
+    '''postgresql://botuser:(devpassword|testpassword)@localhost:5432/botdb_(dev|test)''',
+    # Template/example database URLs
+    '''postgresql://user:password@host:5432/database''',
+    '''postgresql://\$\{.*\}@.*''',  # Environment variable templates
+]
+
+files = [
+    '''^\.env\.example$''',
+    '''^\.env\.development$''',
+    '''^\.env\.test$''',
+    '''requirements.*\.txt$''',
+    '''tests/.*\.py$''',  # Test files with test keys
+    '''docs/.*\.md$''',   # Documentation with examples
+]
+
+paths = [
+    '''^\.git/''',
+    '''^\.venv/''',
+    '''^__pycache__/''',
+    '''^node_modules/''',
+    '''^\.pytest_cache/''',
+    '''^\.mypy_cache/''',
+    '''^htmlcov/''',
+    '''^\.coverage''',
+    '''coverage\.xml$''',
+    '''^\.secrets\.baseline$''',
+]

@@ -1,10 +1,14 @@
 import os
 from dataclasses import dataclass
 
+from dotenv import find_dotenv, load_dotenv
 
-from dotenv import load_dotenv
 
-load_dotenv()
+env_file = os.getenv("ENV_FILE")
+if env_file:
+    load_dotenv(env_file, override=False)
+else:
+    load_dotenv(find_dotenv(usecwd=True), override=False)
 
 
 @dataclass
@@ -52,7 +56,7 @@ class BotConfig:
             cooldown_seconds=int(os.getenv("COOLDOWN_SECONDS", "10")),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
             max_warnings_before_action=int(
-                os.getenv("MAX_WARNINGS_BEFORE_ACTION", "5")
+                os.getenv("MAX_WARNINGS_BEFORE_ACTION", "5"),
             ),
             enable_audit_logging=os.getenv("ENABLE_AUDIT_LOGGING", "true").lower()
             == "true",
@@ -62,9 +66,18 @@ class BotConfig:
 # Global config instance - lazy loaded
 _config = None
 
-def get_config() -> BotConfig:
+
+def get_config(*, force_reload: bool = False) -> BotConfig:
     """Get the global config instance, creating it if needed."""
     global _config
+    if force_reload:
+        _config = None
     if _config is None:
         _config = BotConfig.from_env()
     return _config
+
+
+def reset_config() -> None:
+    """Reset the cached config (useful for tests or after env changes)."""
+    global _config
+    _config = None

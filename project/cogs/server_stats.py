@@ -14,7 +14,8 @@ class ServerStats(commands.Cog):
         roles = len(guild.roels) - 1  # Exclude @everyone role
 
         embed = discord.Embed(
-            title=f"{guild.name} Statistics", color=discord.Color.green()
+            title=f"{guild.name} Statistics",
+            color=discord.Color.green(),
         )
         embed.add_field(name="Total Members", value=guild.member_count, inline=False)
         embed.add_field(name="Online Members", value=online_members, inline=False)

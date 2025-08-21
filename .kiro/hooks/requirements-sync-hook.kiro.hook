@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Requirements Sync",
+  "description": "Automatically update virtual environment dependencies when requirements files change. Runs make install to update dependencies, then make check-ci to verify compatibility, and shows current versions of key dependencies like discord.py, sqlalchemy, and pytest.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "requirements.txt",
+      "requirements-dev.txt",
+      "requirements.txt"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A requirements file has been modified. Please:\n\n1. Run `make install` to update the virtual environment dependencies\n2. Run `make check-ci` to verify compatibility and catch any issues\n3. Show the current versions of these key dependencies by running appropriate pip commands:\n   - discord.py\n   - sqlalchemy \n   - pytest\n4. Report if the dependency update was successful and if any compatibility issues were found\n\nIf any step fails, please stop and report the specific error. This ensures the virtual environment stays in sync with requirements changes and prevents dependency conflicts."
+  }
+}
