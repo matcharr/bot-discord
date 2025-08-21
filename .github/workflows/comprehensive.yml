@@ -8,24 +8,24 @@ on:
   push:
     branches: [main]
     paths:
-      - 'project/**/*.py'
-      - 'tests/**/*.py'
-      - 'requirements*.txt'
-      - 'project/requirements*.txt'
+      - "project/**/*.py"
+      - "tests/**/*.py"
+      - "requirements*.txt"
+      - "project/requirements*.txt"
   pull_request:
     branches: [main]
     paths:
-      - 'project/**/*.py'
-      - 'tests/**/*.py'
-      - 'requirements*.txt'
-      - 'project/requirements*.txt'
-      - '.github/workflows/**'
-      - 'pyproject.toml'
-      - 'ruff.toml'
-      - '.env*'
-      - 'docker/**'
+      - "project/**/*.py"
+      - "tests/**/*.py"
+      - "requirements*.txt"
+      - "project/requirements*.txt"
+      - ".github/workflows/**"
+      - "pyproject.toml"
+      - "ruff.toml"
+      - ".env*"
+      - "docker/**"
 
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
   # Parallel job for Python quality checks
@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch full history for gitleaks
+          fetch-depth: 0 # Fetch full history for gitleaks
 
       - name: Run gitleaks security scan
         uses: gitleaks/gitleaks-action@v2
@@ -118,8 +118,10 @@ jobs:
           npm install -g markdownlint-cli
 
           # Install actionlint
-          curl -s https://raw.githubusercontent.com/rhymond/actionlint/main/scripts/download-actionlint.bash | bash
+          wget -q https://github.com/rhymond/actionlint/releases/download/v1.6.26/actionlint_1.6.26_linux_amd64.tar.gz
+          tar -xzf actionlint_1.6.26_linux_amd64.tar.gz
           sudo mv actionlint /usr/local/bin/
+          rm actionlint_1.6.26_linux_amd64.tar.gz
 
       - name: YAML validation
         run: yamllint .
@@ -145,7 +147,7 @@ jobs:
     needs: [python-quality, security-scan, multi-language-validation]
     strategy:
       matrix:
-        python-version: ["3.11"]  # Match local development version
+        python-version: ["3.11"] # Match local development version
 
     steps:
       - uses: actions/checkout@v4
