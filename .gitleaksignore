@@ -1,0 +1,27 @@
+# Gitleaks ignore file for known safe secrets
+# Format: <secret-hash>:<file>:<rule-id>
+
+# Test environment files with clearly marked test keys
+dGVzdF9zYWx0XzEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg=:.env.test:generic-api-key
+dGVzdF9wZXBwZXJfMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3:.env.test:generic-api-key
+dGVzdF9lbmNyeXB0aW9uX2tleV8xMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTA=:.env.test:generic-api-key
+123456789012345678:.env.test:discord-client-id
+
+# Test files with test keys
+test_key_12345678901234567890123456789012:tests/database/test_services.py:generic-api-key
+test_pepper_123456789012345678901234567:tests/database/test_services.py:generic-api-key
+dGVzdF9zYWx0XzEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg=:tests/database/test_models.py:generic-api-key
+dGVzdF9wZXBwZXJfMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3:tests/database/test_models.py:generic-api-key
+dGVzdF9zYWx0XzEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg=:tests/database/test_security.py:generic-api-key
+dGVzdF9wZXBwZXJfMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3:tests/database/test_security.py:generic-api-key
+
+# Development database URLs (clearly marked as dev/test)
+ql:.env.development:postgresql-connection
+ql:scripts/db-manage.sh:postgresql-connection
+ql:docs/SETUP_NO_DOCKER.md:postgresql-connection
+ql:docs/DATABASE.md:postgresql-connection
+ql:.env.example:postgresql-connection
+
+# Documentation examples with example keys
+ZGV2X3NhbHRfa2V5XzEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg=:docs/SETUP_NO_DOCKER.md:generic-api-key
+ZGV2X3BlcHBlcl9rZXlfMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3:docs/SETUP_NO_DOCKER.md:generic-api-key

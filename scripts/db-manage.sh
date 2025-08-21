@@ -13,7 +13,6 @@ NC='\033[0m' # No Color
 # Configuration
 COMPOSE_FILE="docker-compose.dev.yml"
 DOCKER_COMPOSE="docker compose"
-DB_CONTAINER="botdb_dev"
 
 # Utility functions
 log_info() {
@@ -68,7 +67,7 @@ start_db() {
 
     log_info "Waiting for database to be ready..."
     TIMEOUT_CMD=$(get_timeout_cmd)
-    $TIMEOUT_CMD 30 bash -c 'until '$DOCKER_COMPOSE' -f '$COMPOSE_FILE' exec postgres pg_isready -U botuser -d botdb_dev; do sleep 1; done'
+    $TIMEOUT_CMD 30 bash -c 'until '"$DOCKER_COMPOSE"' -f '"$COMPOSE_FILE"' exec postgres pg_isready -U botuser -d botdb_dev; do sleep 1; done'
 
     log_success "Database started and ready!"
 }
@@ -93,7 +92,7 @@ reset_db() {
 
         log_info "Waiting for database to be ready..."
         TIMEOUT_CMD=$(get_timeout_cmd)
-        $TIMEOUT_CMD 30 bash -c 'until '$DOCKER_COMPOSE' -f '$COMPOSE_FILE' exec postgres pg_isready -U botuser -d botdb_dev; do sleep 1; done'
+        $TIMEOUT_CMD 30 bash -c 'until '"$DOCKER_COMPOSE"' -f '"$COMPOSE_FILE"' exec postgres pg_isready -U botuser -d botdb_dev; do sleep 1; done'
 
         log_success "Database reset successfully!"
     else
@@ -102,25 +101,27 @@ reset_db() {
 }
 
 # Initialize tables
+# Initialize tables
 init_tables() {
     log_info "Initializing tables..."
-    init_tables() {
-        log_info "Initializing tables..."
-        # Load DATABASE_URL from environment or .env file
-        if [ -z "$DATABASE_URL" ]; then
-            if [ -f .env.development ]; then
-                export $(grep -v '^#' .env.development | xargs)
-            else
-                log_error "DATABASE_URL not set and .env.development not found"
-                exit 1
-            fi
+    # Load DATABASE_URL from environment or .env file
+    if [ -z "$DATABASE_URL" ]; then
+        if [ -f .env.development ]; then
+            set -a
+            # shellcheck source=.env.development
+            # shellcheck disable=SC1091
+            source .env.development
+            set +a
+        else
+            log_error "DATABASE_URL not set and .env.development not found"
+            exit 1
         fi
+    fi
 
-        python3 -c "
+    python3 -c "
 from project.database.connection import init_database
 init_database()
 "
-    }
     log_success "Tables initialized!"
 }
 

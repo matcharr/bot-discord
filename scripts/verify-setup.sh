@@ -34,7 +34,7 @@ log_error() {
 
 check_command() {
     ((CHECKS_TOTAL++))
-    if command -v $1 &> /dev/null; then
+    if command -v "$1" &> /dev/null; then
         log_success "$1 is installed"
         return 0
     else
@@ -189,9 +189,7 @@ test_docker_database() {
     # Test database connection
     ((CHECKS_TOTAL++))
     local connection_test
-    connection_test=$(timeout 10 $DOCKER_CMD -f docker-compose.dev.yml exec -T postgres pg_isready -U botuser -d botdb_dev 2>&1)
-
-    if [ $? -eq 0 ]; then
+    if connection_test=$(timeout 10 "$DOCKER_CMD" -f docker-compose.dev.yml exec -T postgres pg_isready -U botuser -d botdb_dev 2>&1); then
         log_success "PostgreSQL Docker connection successful"
         return 0
     else
@@ -213,9 +211,7 @@ test_native_database() {
 
     # Test connection to native PostgreSQL
     local connection_test
-    connection_test=$(timeout 10 psql -U botuser -d botdb_dev -h localhost -c "SELECT 1;" 2>&1)
-
-    if [ $? -eq 0 ]; then
+    if connection_test=$(timeout 10 psql -U botuser -d botdb_dev -h localhost -c "SELECT 1;" 2>&1); then
         log_success "Native PostgreSQL connection successful"
         return 0
     else
@@ -245,11 +241,16 @@ log_info "7. Testing project imports..."
 test_python_imports() {
     local import_result
     local exit_code
-
     # Execute Python import test with proper error handling
     import_result=$(python3 -c "
 import sys
-sys.path.append('project')
+import os
+# Use absolute path and validate it exists
+project_path = os.path.abspath('project')
+if not os.path.isdir(project_path):
+    print('ERROR: Project directory not found')
+    sys.exit(2)
+sys.path.insert(0, project_path)
 try:
     from database.models import SecureWarning
     from database.services import WarningService
@@ -277,14 +278,16 @@ except Exception as e:
             ;;
         1)
             # Import error - extract the specific import that failed
-            local import_error=$(echo "$import_result" | grep "IMPORT_ERROR:" | sed 's/IMPORT_ERROR: //')
+            local import_error
+            import_error=$(echo "$import_result" | grep "IMPORT_ERROR:" | sed 's/IMPORT_ERROR: //')
             log_error "Import failed: $import_error"
-            log_info "  💡 Try: pip install -r project/requirements.txt"
+            log_info "  💡 Try: pip install -r requirements.txt"
             return 1
             ;;
         2)
             # Other Python error
-            local python_error=$(echo "$import_result" | grep "ERROR:" | sed 's/ERROR: //')
+            local python_error
+            python_error=$(echo "$import_result" | grep "ERROR:" | sed 's/ERROR: //')
             log_error "Python execution error: $python_error"
             log_info "  💡 Check Python environment and project structure"
             return 1

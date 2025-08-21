@@ -1,7 +1,7 @@
 """Database models for secure Discord bot data storage."""
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import (
     Boolean,
@@ -19,6 +19,20 @@ from .connection import Base
 from .security import security_manager
 
 logger = logging.getLogger(__name__)
+
+# Constants for validation
+ALLOWED_ACTION_TYPES = {
+    "warn",
+    "kick",
+    "ban",
+    "unban",
+    "mute",
+    "unmute",
+    "timeout",
+    "purge",
+    "warning_deleted",
+    "warning_edited",
+}
 
 
 class SecureWarning(Base):
@@ -43,13 +57,13 @@ class SecureWarning(Base):
     # Metadata with timezone awareness
     created_at = Column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
     updated_at = Column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     # Soft delete for GDPR compliance
@@ -67,7 +81,7 @@ class SecureWarning(Base):
     )
 
     @validates("reason_encrypted")
-    def validate_reason_encrypted(self, key, value):
+    def validate_reason_encrypted(self, _key, value):
         """Ensure reason is not empty after encryption."""
         if not value or len(value.strip()) == 0:
             raise ValueError("Encrypted reason cannot be empty")
@@ -75,7 +89,11 @@ class SecureWarning(Base):
 
     @classmethod
     def create_warning(
-        cls, guild_id: str, user_id: str, moderator_id: str, reason: str
+        cls,
+        guild_id: str,
+        user_id: str,
+        moderator_id: str,
+        reason: str,
     ) -> "SecureWarning":
         """Create a new warning with automatic encryption and hashing."""
         if not reason or len(reason.strip()) == 0:
@@ -84,7 +102,7 @@ class SecureWarning(Base):
         # Log anonymized action for audit
         logger.info(
             f"Creating warning for user {security_manager.anonymize_for_logs(user_id)} "
-            f"in guild {security_manager.anonymize_for_logs(guild_id)}"
+            f"in guild {security_manager.anonymize_for_logs(guild_id)}",
         )
 
         return cls(
@@ -99,15 +117,21 @@ class SecureWarning(Base):
         """Get the decrypted warning reason."""
         try:
             return security_manager.decrypt_text(self.reason_encrypted)
-        except ValueError as e:
-            logger.error(f"Failed to decrypt warning {self.id}: {e}")
+        except ValueError:
+            logger.exception(f"Failed to decrypt warning {self.id}")
+            # Return safe default to avoid leaking encryption details
             return "[DECRYPTION_FAILED]"
 
     def soft_delete(self):
-        """Soft delete this warning for GDPR compliance."""
+        """Soft delete this warning for GDPR compliance with optimistic locking."""
+        if self.is_deleted:
+            logger.warning(f"Warning {self.id} is already deleted")
+            return
+
         self.is_deleted = True
-        self.deleted_at = datetime.now(timezone.utc)
-        logger.info(f"Soft deleted warning {self.id}")
+        self.deleted_at = datetime.now(UTC)
+        self.version += 1  # Increment version for optimistic locking
+        logger.info(f"Soft deleted warning {self.id} (version {self.version})")
 
     def to_dict(self, include_sensitive: bool = True) -> dict:
         """Convert to dictionary with optional sensitive data."""
@@ -138,7 +162,9 @@ class ModerationLog(Base):
 
     # Action details
     action_type = Column(
-        String(50), nullable=False, index=True
+        String(50),
+        nullable=False,
+        index=True,
     )  # warn, kick, ban, etc.
     reason_encrypted = Column(Text, nullable=True)
 
@@ -149,7 +175,7 @@ class ModerationLog(Base):
     # Metadata
     created_at = Column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
 
@@ -163,21 +189,11 @@ class ModerationLog(Base):
     )
 
     @validates("action_type")
-    def validate_action_type(self, key, value):
+    def validate_action_type(self, _key, value):
         """Validate action type is from allowed list."""
-        allowed_actions = {
-            "warn",
-            "kick",
-            "ban",
-            "unban",
-            "mute",
-            "unmute",
-            "timeout",
-            "purge",
-        }
-        if value not in allowed_actions:
+        if value not in ALLOWED_ACTION_TYPES:
             raise ValueError(
-                f"Invalid action type: {value}. Must be one of {allowed_actions}"
+                f"Invalid action type: {value}. Must be one of {ALLOWED_ACTION_TYPES}",
             )
         return value
 
@@ -188,16 +204,16 @@ class ModerationLog(Base):
         user_id: str,
         moderator_id: str,
         action_type: str,
-        reason: str = None,
-        context: str = None,
-        warning_id: int = None,
+        reason: str | None = None,
+        context: str | None = None,
+        warning_id: int | None = None,
     ) -> "ModerationLog":
         """Create a new moderation log entry."""
         # Log anonymized action
         logger.info(
             f"Logging {action_type} action by moderator "
             f"{security_manager.anonymize_for_logs(moderator_id)} "
-            f"on user {security_manager.anonymize_for_logs(user_id)}"
+            f"on user {security_manager.anonymize_for_logs(user_id)}",
         )
 
         return cls(
@@ -240,12 +256,34 @@ class GDPRRequest(Base):
     user_id_hash = Column(String(64), nullable=False, index=True)
     request_type = Column(String(20), nullable=False)  # 'export', 'delete'
     status = Column(
-        String(20), default="pending", nullable=False
+        String(20),
+        default="pending",
+        nullable=False,
     )  # 'pending', 'completed', 'failed'
+
+    @validates("request_type")
+    def validate_request_type(self, _key, value):
+        """Validate request type is from allowed list."""
+        allowed_types = {"export", "delete"}
+        if value not in allowed_types:
+            raise ValueError(
+                f"Invalid request type: {value}. Must be one of {allowed_types}",
+            )
+        return value
+
+    @validates("status")
+    def validate_status(self, _key, value):
+        """Validate status is from allowed list."""
+        allowed_statuses = {"pending", "completed", "failed"}
+        if value not in allowed_statuses:
+            raise ValueError(
+                f"Invalid status: {value}. Must be one of {allowed_statuses}",
+            )
+        return value
 
     created_at = Column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
     )
     completed_at = Column(DateTime(timezone=True), nullable=True)

@@ -47,6 +47,8 @@ class TestDatabaseModels:
         """Cleanup after each test."""
         # Clean up database
         self.session.query(SecureWarning).delete()
+        self.session.query(ModerationLog).delete()
+        self.session.query(GDPRRequest).delete()
         self.session.commit()
         self.session.close()
         self.env_patch.stop()

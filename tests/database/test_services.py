@@ -36,9 +36,9 @@ class TestWarningService:
         # Create service
         self.service = WarningService()
 
-        # Clean up any existing data using rollback
-        self.service.db.rollback()
-        # Or create a fresh session
+        # Close any existing session and create a fresh one
+        if hasattr(self.service, "db"):
+            self.service.db.close()
         self.service.db = self.Session()
 
     def teardown_method(self):

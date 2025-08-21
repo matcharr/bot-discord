@@ -10,7 +10,11 @@
       "project/database/security.py",
       "project/database/models.py",
       ".env*",
-      "project/cogs/*.py"
+      "project/cogs/*.py",
+      "project/utils/*.py",
+      "requirements*.txt",
+      "Dockerfile*",
+      "docker-compose*.yml"
     ]
   },
   "then": {

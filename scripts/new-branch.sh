@@ -43,17 +43,10 @@ DESCRIPTION=$2
 VALID_TYPES=("feat" "fix" "chore" "docs" "refactor" "test")
 
 # Verify type is valid
-is_valid=false
-for t in "${VALID_TYPES[@]}"; do
-  if [[ "$t" == "$TYPE" ]]; then
-    is_valid=true
-    break
-  fi
-done
-if [[ "$is_valid" != true ]]; then
-  echo -e "${RED}❌ Invalid type: $TYPE${NC}"
-  echo -e "${YELLOW}Valid types: ${VALID_TYPES[*]}${NC}"
-  exit 1
+if ! printf '%s\n' "${VALID_TYPES[@]}" | grep -Fxq "$TYPE"; then
+    echo -e "${RED}❌ Invalid type: $TYPE${NC}"
+    echo -e "${YELLOW}Valid types: ${VALID_TYPES[*]}${NC}"
+    exit 1
 fi
 
 # Clean description (replace spaces with dashes, lowercase)
@@ -72,24 +65,34 @@ if [ "$CURRENT_BRANCH" = "$BRANCH_NAME" ]; then
 fi
 
 # Check branch doesn't already exist
-if git show-ref --verify --quiet refs/heads/$BRANCH_NAME; then
+if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
     echo -e "${RED}❌ Branch $BRANCH_NAME already exists${NC}"
+    exit 1
+fi
+# Also check remote to avoid conflicts on first push
+if git ls-remote --exit-code --heads origin "$BRANCH_NAME" >/dev/null 2>&1; then
+    echo -e "${RED}❌ Remote branch $BRANCH_NAME already exists on origin${NC}"
     exit 1
 fi
 
 # Save uncommitted changes if any
-if ! git diff-index --quiet HEAD --; then
+if [[ -n "$(git status --porcelain)" ]]; then
     echo -e "${YELLOW}💾 Saving uncommitted changes...${NC}"
-    git stash push -m "Auto-stash before creating branch $BRANCH_NAME"
+    git stash push -u -m "Auto-stash before creating branch $BRANCH_NAME"
     STASHED=true
 else
     STASHED=false
 fi
 
 # Switch to main and update
-echo -e "${YELLOW}🔄 Updating main branch...${NC}"
-git checkout main
-git pull origin main
+echo -e "${YELLOW}🔄 Updating default branch...${NC}"
+DEFAULT_BRANCH="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD | sed 's|^origin/||')"
+if [[ -z "${DEFAULT_BRANCH}" ]]; then
+    echo -e "${RED}❌ Could not determine default branch from origin/HEAD${NC}"
+    exit 1
+fi
+git checkout "${DEFAULT_BRANCH}"
+git pull --ff-only origin "${DEFAULT_BRANCH}"
 
 # Create and switch to new branch
 echo -e "${YELLOW}🌿 Creating branch $BRANCH_NAME...${NC}"

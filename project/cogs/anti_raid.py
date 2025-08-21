@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from collections import defaultdict
-from typing import Dict, Set
 
 import discord
 from config import get_config
@@ -14,9 +13,9 @@ logger = logging.getLogger(__name__)
 class AntiRaid(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.spam_count: Dict[discord.Member, int] = defaultdict(int)
-        self.spam_users: Set[discord.Member] = set()
-        self.cooldown_tasks: Dict[discord.Member, asyncio.Task] = {}
+        self.spam_count: dict[discord.Member, int] = defaultdict(int)
+        self.spam_users: set[discord.Member] = set()
+        self.cooldown_tasks: dict[discord.Member, asyncio.Task] = {}
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -34,48 +33,48 @@ class AntiRaid(commands.Cog):
         if self.spam_count[message.author] == get_config().spam_threshold:
             self.spam_users.add(message.author)
             logger.info(
-                f"User {message.author} flagged for spam (threshold: {get_config().spam_threshold})"
+                f"User {message.author} flagged for spam (threshold: {get_config().spam_threshold})",
             )
 
         # Take action if kick threshold reached
-        if message.author in self.spam_users:
-            if self.spam_count[message.author] >= get_config().kick_threshold:
-                try:
-                    await message.author.kick(reason="Automatic kick: Spam detected")
+        if (
+            message.author in self.spam_users
+            and self.spam_count[message.author] >= get_config().kick_threshold
+        ):
+            try:
+                await message.author.kick(reason="Automatic kick: Spam detected")
 
-                    # Log the action
-                    await log_moderation_action(
-                        "AUTO_KICK",
-                        self.bot.user,
-                        message.author,
-                        "Spam detection",
-                        message.guild,
-                    )
+                # Log the action
+                await log_moderation_action(
+                    "AUTO_KICK",
+                    self.bot.user,
+                    message.author,
+                    "Spam detection",
+                    message.guild,
+                )
 
-                    # Clean up tracking
-                    del self.spam_count[message.author]
-                    self.spam_users.discard(message.author)
+                # Clean up tracking
+                del self.spam_count[message.author]
+                self.spam_users.discard(message.author)
 
-                    # Cancel cooldown task if exists
-                    if message.author in self.cooldown_tasks:
-                        self.cooldown_tasks[message.author].cancel()
-                        del self.cooldown_tasks[message.author]
+                # Cancel cooldown task if exists
+                if message.author in self.cooldown_tasks:
+                    self.cooldown_tasks[message.author].cancel()
+                    del self.cooldown_tasks[message.author]
 
-                    logger.info(f"Auto-kicked {message.author} for spam")
+                logger.info(f"Auto-kicked {message.author} for spam")
 
-                except discord.Forbidden:
-                    logger.warning(
-                        f"Failed to kick {message.author}: Missing permissions"
-                    )
-                except discord.HTTPException as e:
-                    logger.error(f"Failed to kick {message.author}: {e}")
+            except discord.Forbidden:
+                logger.warning(f"Failed to kick {message.author}: Missing permissions")
+            except discord.HTTPException:
+                logger.exception(f"Failed to kick {message.author}")
 
         # Start or restart cooldown
         if message.author in self.cooldown_tasks:
             self.cooldown_tasks[message.author].cancel()
 
         self.cooldown_tasks[message.author] = asyncio.create_task(
-            self._cooldown_user(message.author)
+            self._cooldown_user(message.author),
         )
 
     async def _cooldown_user(self, user: discord.Member):

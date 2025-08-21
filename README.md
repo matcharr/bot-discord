@@ -9,7 +9,7 @@ A comprehensive Discord bot with moderation tools, anti-raid protection, and ser
 
 ## Quick Start
 
-1. **Install dependencies**: `pip install -r project/requirements.txt`
+1. **Install dependencies**: `pip install -r requirements.txt`
 2. **Setup database**: `./scripts/db-manage.sh start && ./scripts/db-manage.sh init`
 3. **Configure environment**: Copy `.env.development` and update with your bot token
 4. **Create a "logs" channel** in your Discord server
@@ -49,7 +49,7 @@ make check
 # Start PostgreSQL
 ./scripts/db-manage.sh start
 
-# Stop PostgreSQL  
+# Stop PostgreSQL
 ./scripts/db-manage.sh stop
 
 # Reset database (⚠️ deletes all data)
@@ -83,7 +83,7 @@ Automatically detects and kicks spammers (10+ messages triggers kick, 10-second 
 - `/warn @user reason` - Issue warnings (stored in warnings.json)
 - `/warnings @user` - View user warnings
 - `/kick @user reason` - Kick user
-- `/ban @user reason` - Ban user  
+- `/ban @user reason` - Ban user
 - `/unban user#1234` - Unban user
 - `/mute @user reason` - Mute user (creates Muted role)
 - `/tempban @user 1h reason` - Temporary ban (m/h/d)
@@ -105,7 +105,7 @@ Automatically detects and kicks spammers (10+ messages triggers kick, 10-second 
 
 ```
 ✅ Send Messages          ✅ Manage Messages
-✅ Kick Members           ✅ Ban Members  
+✅ Kick Members           ✅ Ban Members
 ✅ Manage Roles           ✅ View Audit Log
 ✅ Embed Links            ✅ Manage Guild
 ```
@@ -124,7 +124,7 @@ Automatically detects and kicks spammers (10+ messages triggers kick, 10-second 
 ```
 project/cogs/
 ├── anti_raid.py      # Spam detection & auto-kick
-├── moderation.py     # Warning/kick/ban/mute commands  
+├── moderation.py     # Warning/kick/ban/mute commands
 ├── logging_system.py # Event logging to #logs
 ├── role_management.py # Role creation & assignment
 ├── invite_management.py # Invite tracking
@@ -134,7 +134,7 @@ project/cogs/
 ## Loading Cogs
 ```python
 # In your main bot file
-cogs = ['anti_raid', 'moderation', 'logging_system', 
+cogs = ['anti_raid', 'moderation', 'logging_system',
         'role_management', 'invite_management', 'reporting']
 
 for cog in cogs:
@@ -148,7 +148,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and commit mes
 ## Documentation
 
 - **[Database Setup](docs/database.md)** - Database configuration and management
-- **[Git Workflow](docs/git-workflow.md)** - Git development process  
+- **[Git Workflow](docs/git-workflow.md)** - Git development process
 - **[Setup Checklist](docs/setup-checklist.md)** - Step-by-step setup guide
 - **[Setup without Docker](docs/setup-no-docker.md)** - Alternative setup method
 

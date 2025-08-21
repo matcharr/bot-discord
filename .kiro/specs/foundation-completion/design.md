@@ -72,6 +72,18 @@ class KeyGenerator:
     def generate_salt_key(self) -> str
     def generate_pepper_key(self) -> str
     def validate_key_format(self, key: str) -> bool
+    def rotate_encryption_key(self, old_key: str) -> Tuple[str, MigrationPlan]
+    def generate_key_rotation_plan(self) -> KeyRotationPlan
+
+@dataclass
+class KeyRotationPlan:
+    old_key_hash: str
+    new_key_hash: str
+    affected_records_count: int
+    migration_steps: List[MigrationStep]
+    rollback_plan: RollbackPlan
+    estimated_duration: timedelta
+    requires_downtime: bool
 ```
 
 ### 2. Database Initialization Component
@@ -90,6 +102,11 @@ class DatabaseInitializer:
     def test_connections(self) -> Dict[str, bool]
     def validate_encryption_flow(self) -> bool
     def run_health_checks(self) -> HealthStatus
+    def rollback_schema(self) -> bool
+    def cleanup_failed_initialization(self) -> bool
+    def create_pre_initialization_backup(self) -> BackupResult
+    def restore_from_backup(self, backup_id: srt) -> bool
+    def validate_backup_integrity(self, backup_id: str) -> book
 
 class EncryptionTester:
     def test_encrypt_decrypt_cycle(self, data: str) -> bool

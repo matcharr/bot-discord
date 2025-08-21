@@ -63,7 +63,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts/init-dev.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U botuser -d botdb_dev"]
       interval: 10s
@@ -95,6 +95,12 @@ docker-compose -f docker-compose.dev.yml down -v && docker-compose -f docker-com
 ### Key Generation
 
 Before setting up your environment, generate secure encryption keys:
+
++**⚠️ CRITICAL SECURITY WARNING**:
+- NEVER use the same keys across different environments
+- NEVER commit keys to version control
+- NEVER share keys between team members
+- Generate NEW keys for each environment using the code below
 
 ```python
 # Generate encryption keys (run this in Python)

@@ -12,7 +12,11 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";  -- For text search
 -- Initialization log
 DO $$
 BEGIN
-    RAISE NOTICE 'Database botdb_dev initialized successfully!';
-    RAISE NOTICE 'User: botuser';
-    RAISE NOTICE 'Extensions installed: uuid-ossp, pg_trgm';
+DO $
+BEGIN
+    RAISE NOTICE 'Database % initialized successfully!', current_database();
+    RAISE NOTICE 'User: %', current_user;
+    RAISE NOTICE 'Extensions installed: %',
+      (SELECT string_agg(extname, ', ') FROM pg_extension);
+END $;
 END $$;

@@ -29,7 +29,7 @@ git clone <your-repo-url>
 cd bot-discord
 
 # Install Python dependencies
-pip install -r project/requirements.txt
+pip install -r requirements.txt
 pip install -r requirements-dev.txt
 
 # Setup Git hooks
@@ -156,7 +156,7 @@ python -m pytest tests/database/ -v
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
 # Reinstall dependencies
-pip install -r project/requirements.txt --force-reinstall
+pip install -r requirements.txt --force-reinstall
 ```
 
 ### Permission Issues

@@ -1,25 +1,28 @@
 """Database connection and session management."""
 
 import os
-from typing import Generator
+from collections.abc import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 # Database URL from environment
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///warnings.db")
+engine_kwargs = {
+    "echo": False,
+}
 
-# SQLAlchemy setup
-engine = create_engine(
-    DATABASE_URL,
-    # SQLite specific settings
-    connect_args=({"check_same_thread": False} if "sqlite" in DATABASE_URL else {}),
-    # PostgreSQL specific settings
-    pool_pre_ping=True if "postgresql" in DATABASE_URL else False,
-    echo=False,  # Set to True for SQL debugging
-)
+if DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+    if ":memory:" in DATABASE_URL or "mode=memory" in DATABASE_URL:
+        engine_kwargs["poolclass"] = StaticPool
+else:
+    engine_kwargs["pool_pre_ping"] = True
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(DATABASE_URL, **engine_kwargs)
+
+SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 Base = declarative_base()
 
 
@@ -39,5 +42,9 @@ def init_database():
 
 
 def get_db_session() -> Session:
-    """Get a database session (for non-async usage)."""
+    """Get a database session (for non-async usage).
+
+    Note: Caller is responsible for closing the session.
+    Consider using get_db() generator for automatic cleanup.
+    """
     return SessionLocal()

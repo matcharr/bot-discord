@@ -18,7 +18,7 @@ This is a comprehensive Discord moderation bot designed for server management an
 ## Key Requirements
 - Requires PostgreSQL database for secure data storage
 - Needs specific Discord permissions (manage messages, kick/ban members, manage roles)
-- Requires dedicated #logs channel and report channel configuration
+- Requires a dedicated #logs channel and report channel configuration
 - Uses encrypted storage for sensitive moderation data (warnings, user info)
 
 ## Security Focus

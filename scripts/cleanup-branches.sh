@@ -5,7 +5,6 @@
 set -euo pipefail
 
 # Colors for display
-RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
@@ -19,7 +18,8 @@ echo -e "${YELLOW}🔄 Cleaning obsolete remote references...${NC}"
 if git remote get-url origin >/dev/null 2>&1; then
     PRUNED=$(git remote prune origin 2>&1)
     if echo "$PRUNED" | grep -q "pruned"; then
-        echo "$PRUNED" | grep "pruned" | wc -l | xargs -I {} echo -e "${GREEN}✅ {} remote references removed${NC}"
+        PRUNED_COUNT=$(echo "$PRUNED" | grep -c "pruned")
+        echo -e "${GREEN}✅ $PRUNED_COUNT remote references removed${NC}"
     else
         echo -e "${GREEN}✅ No obsolete references found${NC}"
     fi
@@ -35,7 +35,7 @@ MERGED_BRANCHES=$(git branch --merged "${DEFAULT_BRANCH}" | grep -v "${DEFAULT_B
 if [ -z "$MERGED_BRANCHES" ]; then
     echo -e "${GREEN}✅ No merged local branches to delete${NC}"
 else
-    echo "$MERGED_BRANCHES" | while read branch; do
+    echo "$MERGED_BRANCHES" | while read -r branch; do
         echo -e "  ${YELLOW}📌 $branch${NC}"
     done
     echo ""
@@ -44,7 +44,7 @@ else
     echo -e "${YELLOW}❓ Do you want to delete these branches? (y/N)${NC}"
     read -r response
     if [[ "$response" =~ ^[Yy]$ ]]; then
-        echo "$MERGED_BRANCHES" | while read branch; do
+        echo "$MERGED_BRANCHES" | while read -r branch; do
             git branch -d "$branch"
             echo -e "${GREEN}✅ Branch $branch deleted${NC}"
         done
@@ -60,7 +60,7 @@ DEPENDABOT_BRANCHES=$(git branch -r | grep "dependabot" | sed 's/^[ ]*//' || tru
 if [ -z "$DEPENDABOT_BRANCHES" ]; then
     echo -e "${GREEN}✅ No remaining Dependabot branches${NC}"
 else
-    echo "$DEPENDABOT_BRANCHES" | while read branch; do
+    echo "$DEPENDABOT_BRANCHES" | while read -r branch; do
         echo -e "  ${YELLOW}🤖 $branch${NC}"
     done
     echo ""

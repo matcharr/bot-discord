@@ -15,7 +15,9 @@ class LoggingSystem(commands.Cog):
             embed.add_field(name="Author", value=message.author.mention, inline=False)
             embed.add_field(name="Channel", value=message.channel.mention, inline=False)
             embed.add_field(
-                name="Content", value=message.content or "None", inline=False
+                name="Content",
+                value=message.content or "None",
+                inline=False,
             )
             await log_channel.send(embed=embed)
 

@@ -1,0 +1,14 @@
+# Production dependencies - what the bot needs to run
+discord.py==2.5.2
+python-dotenv==1.1.1
+psutil==5.9.5
+aiohttp==3.12.15
+
+# Database dependencies
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+cryptography==42.0.7
+alembic==1.13.1
+
+# Password hashing for security
+argon2-cffi==23.1.0

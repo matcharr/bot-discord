@@ -10,7 +10,8 @@ class UserInfo(commands.Cog):
         roles_str = ", ".join(roles) if roles else "None"
 
         embed = discord.Embed(
-            title=f"User Information for {member}", color=discord.Color.blue()
+            title=f"User Information for {member}",
+            color=discord.Color.blue(),
         )
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name="Username", value=member.name, inline=False)

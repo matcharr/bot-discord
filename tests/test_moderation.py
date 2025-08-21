@@ -38,18 +38,6 @@ class TestModeration:
 
     @patch("project.cogs.moderation.init_database")
     @patch("project.cogs.moderation.get_config")
-    def test_moderation_cog_initialization(self, mock_get_config, mock_init_db):
-        """Test moderation cog initializes with database."""
-        mock_bot = MagicMock()
-        mock_get_config.return_value.max_warnings_before_action = 5
-        mock_init_db.return_value = None
-
-        mod = Moderation(mock_bot)
-        assert mod.bot == mock_bot
-        mock_init_db.assert_called_once()
-
-    @patch("project.cogs.moderation.init_database")
-    @patch("project.cogs.moderation.get_config")
     def test_database_service_integration(self, mock_get_config, mock_init_db):
         """Test that moderation cog integrates with database service."""
         mock_bot = MagicMock()

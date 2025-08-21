@@ -5,7 +5,7 @@ This document describes the standardized Git workflow for this project.
 ## 🌿 Branch Naming Convention
 
 ### Format
-```
+```text
 type/description-in-kebab-case
 ```
 
@@ -48,7 +48,7 @@ git checkout -b feat/my-new-feature
 ## 📝 Commit Convention
 
 ### Format
-```
+```text
 type(scope): description
 
 body (optional)

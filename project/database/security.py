@@ -5,7 +5,6 @@ import hashlib
 import logging
 import os
 import secrets
-from typing import Optional
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -22,7 +21,13 @@ class SecurityManager:
         self._encryption_key = self._get_encryption_key()
         self._salt = self._get_salt()
         self._pepper = self._get_pepper()  # Additional security layer
-        self._cipher = Fernet(self._encryption_key)
+        try:
+            self._cipher = Fernet(self._encryption_key)
+        except Exception as e:
+            logger.exception("Invalid encryption key format")
+            raise ValueError(
+                "Invalid encryption key. Please ensure ENCRYPTION_KEY is a valid Fernet key.",
+            ) from e
 
     def _get_encryption_key(self) -> bytes:
         """Get or derive encryption key using PBKDF2."""
@@ -31,25 +36,28 @@ class SecurityManager:
             # Generate cryptographically secure key for development
             key = Fernet.generate_key()
             logger.warning(
-                "Generated new encryption key. Add ENCRYPTION_KEY to your .env file"
+                "Generated new encryption key. Add ENCRYPTION_KEY to your .env file",
             )
-            # Only show the key in a secure way, not in logs
-            print(f"ENCRYPTION_KEY={key.decode()}")
             return key
 
-        # If key is a password, derive it properly
-        if len(key_str) < 32:  # Likely a password, not a key
-            salt = os.getenv("KEY_DERIVATION_SALT", "default_salt").encode()
+        # Check if it's a valid Fernet key
+        try:
+            Fernet(key_str.encode())
+            return key_str.encode()
+        except Exception:
+            # Not a valid Fernet key, treat as password
+            salt_str = os.getenv("KEY_DERIVATION_SALT")
+            if not salt_str:
+                msg = "KEY_DERIVATION_SALT must be set when using password-based encryption"
+                raise ValueError(msg) from None
+            salt = salt_str.encode()
             kdf = PBKDF2HMAC(
                 algorithm=hashes.SHA256(),
                 length=32,
                 salt=salt,
                 iterations=100000,  # OWASP recommended minimum
             )
-            key = base64.urlsafe_b64encode(kdf.derive(key_str.encode()))
-            return key
-
-        return key_str.encode()
+            return base64.urlsafe_b64encode(kdf.derive(key_str.encode()))
 
     def _get_salt(self) -> str:
         """Get or generate cryptographically secure salt."""
@@ -58,8 +66,18 @@ class SecurityManager:
             # Generate cryptographically secure salt
             salt = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
             logger.warning("Generated new salt. Add SALT_KEY to your .env file")
-            print(f"SALT_KEY={salt}")
+            # Log the need to set the key, but don't print the actual value
+            logger.warning("Please set SALT_KEY in your .env file")
         return salt
+
+    def hash_discord_id(self, discord_id: str) -> str:
+        """Hash a Discord ID with salt and pepper for maximum privacy."""
+        from argon2 import PasswordHasher
+
+        ph = PasswordHasher()
+        # Combine ID with pepper (salt is handled by Argon2)
+        combined = f"{discord_id}{self._pepper}"
+        return ph.hash(combined)
 
     def _get_pepper(self) -> str:
         """Get or generate pepper (server-side secret for additional security)."""
@@ -67,18 +85,9 @@ class SecurityManager:
         if not pepper:
             pepper = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
             logger.warning("Generated new pepper. Add PEPPER_KEY to your .env file")
-            print(f"PEPPER_KEY={pepper}")
+            # Log the need to set the key, but don't print the actual value
+            logger.warning("Please set PEPPER_KEY in your .env file")
         return pepper
-
-    def hash_discord_id(self, discord_id: str) -> str:
-        """Hash a Discord ID with salt and pepper for maximum privacy."""
-        # Use both salt and pepper for defense in depth
-        combined = f"{discord_id}{self._salt}{self._pepper}"
-        # Use SHA-256 with multiple rounds for additional security
-        hash_obj = hashlib.sha256(combined.encode())
-        for _ in range(1000):  # 1000 rounds of hashing
-            hash_obj = hashlib.sha256(hash_obj.digest())
-        return hash_obj.hexdigest()
 
     def encrypt_text(self, text: str) -> str:
         """Encrypt sensitive text data with authenticated encryption."""
@@ -89,8 +98,8 @@ class SecurityManager:
             encrypted_bytes = self._cipher.encrypt(text.encode("utf-8"))
             return base64.urlsafe_b64encode(encrypted_bytes).decode("ascii")
         except Exception as e:
-            logger.error(f"Encryption failed: {e}")
-            raise ValueError("Failed to encrypt data")
+            logger.exception("Encryption failed")
+            raise ValueError("Failed to encrypt data") from e
 
     def decrypt_text(self, encrypted_text: str) -> str:
         """Decrypt sensitive text data with integrity verification."""
@@ -101,9 +110,9 @@ class SecurityManager:
             decrypted_bytes = self._cipher.decrypt(encrypted_bytes)
             return decrypted_bytes.decode("utf-8")
         except Exception as e:
-            logger.error(f"Decryption failed: {e}")
+            logger.exception("Decryption failed")
             # Don't return partial data on failure
-            raise ValueError("Failed to decrypt data - data may be corrupted")
+            raise ValueError("Failed to decrypt data - data may be corrupted") from e
 
     def create_lookup_key(self, guild_id: str, user_id: str) -> str:
         """Create a unique lookup key for guild+user combination."""
@@ -112,7 +121,9 @@ class SecurityManager:
 
         combined = f"{guild_id}:{user_id}"
         lookup_hash = hmac.new(
-            self._pepper.encode(), combined.encode(), hashlib.sha256
+            self._pepper.encode(),
+            combined.encode(),
+            hashlib.sha256,
         ).hexdigest()
         return lookup_hash[:16]  # Truncate for database efficiency
 
@@ -125,7 +136,7 @@ class SecurityManager:
         # Different from main hash to prevent correlation
         log_salt = "logging_salt_" + self._salt
         combined = f"{discord_id}{log_salt}"
-        return hashlib.sha256(combined.encode()).hexdigest()[:8]
+        return hashlib.sha256(combined.encode()).hexdigest()[:16]
 
 
 # Global security manager instance

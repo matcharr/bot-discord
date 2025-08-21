@@ -1,7 +1,8 @@
 """Automated cleanup tasks for database maintenance."""
 
 import logging
-from datetime import datetime, timedelta, timezone
+import os
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import and_
 
@@ -18,8 +19,7 @@ class DatabaseCleanup:
         self.db = get_db_session()
 
     def hard_delete_old_soft_deleted(self, days_old: int = 90):
-        """
-        Permanently delete soft-deleted records older than X days.
+        """Permanently delete soft-deleted records older than X days.
         Default: 90 days (3 months) for GDPR compliance.
 
         Legal basis:
@@ -27,7 +27,9 @@ class DatabaseCleanup:
         - Grace period for appeals: +60 days
         - Total: 90 days is conservative and compliant
         """
-        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_old)
+        if days_old < 0:
+            raise ValueError("days_old must be non-negative")
+        cutoff_date = datetime.now(UTC) - timedelta(days=days_old)
 
         try:
             # Find old soft-deleted warnings
@@ -37,7 +39,7 @@ class DatabaseCleanup:
                     and_(
                         SecureWarning.is_deleted.is_(True),
                         SecureWarning.deleted_at < cutoff_date,
-                    )
+                    ),
                 )
                 .all()
             )
@@ -51,21 +53,20 @@ class DatabaseCleanup:
 
                 self.db.commit()
                 logger.info(
-                    f"Hard deleted {count} old warnings (older than {days_old} days)"
+                    f"Hard deleted {count} old warnings (older than {days_old} days)",
                 )
             else:
                 logger.info("No old soft-deleted warnings to clean up")
 
             return count
 
-        except Exception as e:
+        except Exception:
             self.db.rollback()
-            logger.error(f"Failed to cleanup old warnings: {e}")
+            logger.exception("Failed to cleanup old warnings")
             return 0
 
     def cleanup_old_logs(self, days_old: int = 730):
-        """
-        Clean up very old moderation logs (2 years default).
+        """Clean up very old moderation logs (2 years default).
         Keep for longer than warnings for audit purposes.
 
         Legal basis:
@@ -73,7 +74,9 @@ class DatabaseCleanup:
         - Discord ToS compliance: 2 years is standard
         - Anti-harassment evidence: 2 years reasonable
         """
-        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_old)
+        if days_old < 0:
+            raise ValueError("days_old must be a positive integer")
+        cutoff_date = datetime.now(UTC) - timedelta(days=days_old)
 
         try:
             deleted_count = (
@@ -84,19 +87,19 @@ class DatabaseCleanup:
 
             self.db.commit()
             logger.info(
-                f"Deleted {deleted_count} old moderation logs (older than {days_old} days)"
+                f"Deleted {deleted_count} old moderation logs (older than {days_old} days)",
             )
             return deleted_count
 
-        except Exception as e:
+        except Exception:
             self.db.rollback()
-            logger.error(f"Failed to cleanup old logs: {e}")
+            logger.exception("Failed to cleanup old logs")
             return 0
 
     def get_cleanup_stats(self) -> dict:
         """Get statistics about data that can be cleaned up."""
         try:
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
 
             # Count soft-deleted warnings by age
             soft_deleted_30d = (
@@ -105,7 +108,7 @@ class DatabaseCleanup:
                     and_(
                         SecureWarning.is_deleted.is_(True),
                         SecureWarning.deleted_at < now - timedelta(days=30),
-                    )
+                    ),
                 )
                 .count()
             )
@@ -116,7 +119,7 @@ class DatabaseCleanup:
                     and_(
                         SecureWarning.is_deleted.is_(True),
                         SecureWarning.deleted_at < now - timedelta(days=180),
-                    )
+                    ),
                 )
                 .count()
             )
@@ -135,8 +138,8 @@ class DatabaseCleanup:
                 "cleanup_date": now.isoformat(),
             }
 
-        except Exception as e:
-            logger.error(f"Failed to get cleanup stats: {e}")
+        except Exception:
+            logger.exception("Failed to get cleanup stats")
             return {}
 
     def close(self):
@@ -170,10 +173,10 @@ class LegalCompliance:
     """Handles legal compliance and data retention policies."""
 
     # Legal retention periods (in days)
-    GDPR_SOFT_DELETE_MAX = 90  # 3 months after user request
-    AUDIT_LOG_RETENTION = 730  # 2 years for moderation logs
-    SECURITY_LOG_RETENTION = 365  # 1 year for anti-raid data
-    LEGAL_HOLD_MAX = 2555  # 7 years for legal disputes
+    GDPR_SOFT_DELETE_MAX = int(os.getenv("GDPR_SOFT_DELETE_MAX", 90))
+    AUDIT_LOG_RETENTION = int(os.getenv("AUDIT_LOG_RETENTION", 730))
+    SECURITY_LOG_RETENTION = int(os.getenv("SECURITY_LOG_RETENTION", 365))
+    LEGAL_HOLD_MAX = int(os.getenv("LEGAL_HOLD_MAX", 2555))
 
     @staticmethod
     def get_retention_policy() -> dict:

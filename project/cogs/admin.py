@@ -75,7 +75,7 @@ class Admin(commands.Cog):
             size_kb = backup.stat().st_size / 1024
             modified = datetime.fromtimestamp(backup.stat().st_mtime)
             backup_list.append(
-                f"`{backup.name}` ({size_kb:.1f}KB, {modified.strftime('%Y-%m-%d %H:%M')})"
+                f"`{backup.name}` ({size_kb:.1f}KB, {modified.strftime('%Y-%m-%d %H:%M')})",
             )
 
         embed.description = "\n".join(backup_list)
@@ -110,7 +110,9 @@ class Admin(commands.Cog):
         )
 
         embed.add_field(
-            name="Logging", value=f"Log Level: {get_config().log_level}", inline=True
+            name="Logging",
+            value=f"Log Level: {get_config().log_level}",
+            inline=True,
         )
 
         await ctx.send(embed=embed)

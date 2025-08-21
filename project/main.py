@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Discord Moderation Bot
+"""Discord Moderation Bot
 A comprehensive Discord bot with moderation tools and anti-raid protection.
 """
 
@@ -47,13 +46,14 @@ async def on_ready():
     # Set bot status
     await bot.change_presence(
         activity=discord.Activity(
-            type=discord.ActivityType.watching, name="for rule violations"
-        )
+            type=discord.ActivityType.watching,
+            name="for rule violations",
+        ),
     )
 
 
 @bot.event
-async def on_command(ctx):
+async def on_command(_ctx):
     """Track command usage."""
     if health_checker:
         health_checker.record_command()
@@ -104,7 +104,7 @@ async def load_cogs():
             await bot.load_extension(cog)
             logger.info(f"Loaded cog: {cog}")
         except Exception as e:
-            logger.error(f"Failed to load cog {cog}: {e}")
+            logger.exception(f"Failed to load cog {cog}")
             if health_checker:
                 health_checker.record_error(f"Failed to load cog {cog}: {e}")
 
@@ -116,8 +116,8 @@ async def main():
         await bot.start(get_config().token)
     except KeyboardInterrupt:
         logger.info("Bot shutdown requested")
-    except Exception as e:
-        logger.error(f"Bot crashed: {e}")
+    except Exception:
+        logger.exception("Bot crashed")
     finally:
         await bot.close()
 

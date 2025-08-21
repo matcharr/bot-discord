@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import re
-from typing import Optional
 
 import discord
 from discord.ext import commands
@@ -20,17 +19,20 @@ logger = logging.getLogger(__name__)
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        # Initialize database on startup
+
+    async def cog_load(self):
+        """Initialize database when cog is loaded."""
         try:
+            # Consider making init_database async if possible
             init_database()
             logger.info("✅ Database initialized for moderation system")
-        except Exception as e:
-            logger.error(f"❌ Failed to initialize database: {e}")
+        except Exception:
+            logger.exception("❌ Failed to initialize database")
             raise
 
     @commands.command(name="warn")
     @commands.has_permissions(manage_messages=True)
-    async def warn(self, ctx, member: discord.Member, *, reason: Optional[str] = None):
+    async def warn(self, ctx, member: discord.Member, *, reason: str | None = None):
         # Validation
         if not await validate_hierarchy(ctx, member):
             return
@@ -83,11 +85,11 @@ class Moderation(commands.Cog):
             await log_moderation_action("WARN", ctx.author, member, reason, ctx.guild)
 
             logger.info(
-                f"Warning {warning.id} added for user {member.id} in guild {ctx.guild.id}"
+                f"Warning {warning.id} added for user {member.id} in guild {ctx.guild.id}",
             )
 
-        except Exception as e:
-            logger.error(f"Failed to add warning: {e}")
+        except Exception:
+            logger.exception("Failed to add warning")
             await ctx.send("❌ Failed to add warning. Please try again.")
         finally:
             service.close()
@@ -108,7 +110,7 @@ class Moderation(commands.Cog):
             if not user_warnings:
                 embed.description = "No warnings found."
             else:
-                for i, warning in enumerate(user_warnings, 1):
+                for _i, warning in enumerate(user_warnings, 1):
                     reason = warning.get_decrypted_reason()
                     created_date = warning.created_at.strftime("%Y-%m-%d %H:%M")
 
@@ -121,8 +123,8 @@ class Moderation(commands.Cog):
             embed.set_footer(text=f"Total warnings: {len(user_warnings)}")
             await ctx.send(embed=embed)
 
-        except Exception as e:
-            logger.error(f"Failed to get warnings: {e}")
+        except Exception:
+            logger.exception("Failed to get warnings")
             await ctx.send("❌ Failed to retrieve warnings. Please try again.")
         finally:
             service.close()
@@ -147,7 +149,7 @@ class Moderation(commands.Cog):
                     cleared_count += 1
 
             await ctx.send(
-                f"✅ Cleared {cleared_count} warning(s) for {member.mention}"
+                f"✅ Cleared {cleared_count} warning(s) for {member.mention}",
             )
             await log_moderation_action(
                 "CLEAR_WARNINGS",
@@ -157,8 +159,8 @@ class Moderation(commands.Cog):
                 ctx.guild,
             )
 
-        except Exception as e:
-            logger.error(f"Failed to clear warnings: {e}")
+        except Exception:
+            logger.exception("Failed to clear warnings")
             await ctx.send("❌ Failed to clear warnings. Please try again.")
         finally:
             service.close()
@@ -180,18 +182,18 @@ class Moderation(commands.Cog):
                 )
             else:
                 await ctx.send(
-                    f"❌ Warning #{warning_id} not found or already deleted."
+                    f"❌ Warning #{warning_id} not found or already deleted.",
                 )
 
-        except Exception as e:
-            logger.error(f"Failed to delete warning: {e}")
+        except Exception:
+            logger.exception("Failed to delete warning")
             await ctx.send("❌ Failed to delete warning. Please try again.")
         finally:
             service.close()
 
     @commands.command(name="kick")
     @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: discord.Member, *, reason: Optional[str] = None):
+    async def kick(self, ctx, member: discord.Member, *, reason: str | None = None):
         if not await validate_hierarchy(ctx, member):
             return
 
@@ -204,7 +206,9 @@ class Moderation(commands.Cog):
                 description=f"{member.mention} has been kicked from the server.",
             )
             embed.add_field(
-                name="Reason", value=reason or "No reason provided", inline=False
+                name="Reason",
+                value=reason or "No reason provided",
+                inline=False,
             )
             embed.add_field(name="Moderator", value=ctx.author.mention, inline=True)
 
@@ -244,7 +248,9 @@ class Moderation(commands.Cog):
 
             for channel in ctx.guild.channels:
                 await channel.set_permissions(
-                    muted_role, speak=False, send_messages=False
+                    muted_role,
+                    speak=False,
+                    send_messages=False,
                 )
 
         await member.add_roles(muted_role, reason=reason)
@@ -256,7 +262,7 @@ class Moderation(commands.Cog):
         seconds = self.parse_time(duration)
         if seconds is None:
             await ctx.send(
-                "Invalid time format. Use `m` for minutes, `h` for hours, or `d` for days."
+                "Invalid time format. Use `m` for minutes, `h` for hours, or `d` for days.",
             )
             return
 
@@ -270,12 +276,17 @@ class Moderation(commands.Cog):
     @commands.command(name="tempmute")
     @commands.has_permissions(manage_roles=True)
     async def tempmute(
-        self, ctx, member: discord.Member, duration: str, *, reason=None
+        self,
+        ctx,
+        member: discord.Member,
+        duration: str,
+        *,
+        reason=None,
     ):
         seconds = self.parse_time(duration)
         if seconds is None:
             await ctx.send(
-                "Invalid time format. Use `m` for minutes, `h` for hours, or `d` for days."
+                "Invalid time format. Use `m` for minutes, `h` for hours, or `d` for days.",
             )
             return
 
@@ -285,7 +296,9 @@ class Moderation(commands.Cog):
             muted_role = await ctx.guild.create_role(name="Muted")
             for channel in ctx.guild.channels:
                 await channel.set_permissions(
-                    muted_role, speak=False, send_messages=False
+                    muted_role,
+                    speak=False,
+                    send_messages=False,
                 )
 
         await member.add_roles(muted_role, reason=reason)
@@ -303,7 +316,7 @@ class Moderation(commands.Cog):
         amount: int,
         member: discord.Member = None,
         *,
-        content_filter: str = None,
+        content_filter: str | None = None,
     ):
         if amount < 1:
             await ctx.send("Please specify a positive amount of messages to delete.")
@@ -312,15 +325,13 @@ class Moderation(commands.Cog):
         def check_messages(msg):
             if member and msg.author != member:
                 return False
-            if content_filter and content_filter not in msg.content:
-                return False
-            return True
+            return not (content_filter and content_filter not in msg.content)
 
         deleted = await ctx.channel.purge(limit=amount + 1, check=check_messages)
         await ctx.send(f"Deleted {len(deleted) - 1} emssage(s)", delete_after=5)
 
     @staticmethod
-    def parse_time(time: str) -> Optional[int]:
+    def parse_time(time: str) -> int | None:
         """Parse time string into seconds with validation."""
         if not time or not isinstance(time, str):
             return None
@@ -343,11 +354,11 @@ class Moderation(commands.Cog):
             if amount > 10080:  # Max 1 week in minutes
                 return None
             return amount * 60
-        elif unit == "h":
+        if unit == "h":
             if amount > 168:  # Max 1 week in hours
                 return None
             return amount * 3600
-        elif unit == "d":
+        if unit == "d":
             if amount > 30:  # Max 30 days
                 return None
             return amount * 86400
@@ -367,7 +378,9 @@ class Moderation(commands.Cog):
             embed.add_field(name="User", value=f"{user} ({user.id})", inline=True)
             embed.add_field(name="Action", value=action, inline=True)
             embed.add_field(
-                name="Reason", value=reason or "No reason provided", inline=False
+                name="Reason",
+                value=reason or "No reason provided",
+                inline=False,
             )
 
             try:

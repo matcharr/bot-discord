@@ -27,10 +27,10 @@
 
 ### Development Setup
 ```bash
-make setup                    # Complete development setup
-make install                  # Install dependencies only
-pip install -r project/requirements.txt  # Production deps
-pip install -r requirements-dev.txt      # Development deps
+make dev-setup               # Complete development setup
+make install                 # Install dependencies only
+pip install -r requirements.txt   # Production deps
+pip install -r requirements-dev.txt       # Development deps
 ```
 
 ### Code Quality
@@ -43,8 +43,7 @@ make lint                     # Run flake8 and mypy
 ### Testing
 ```bash
 make test                     # Run tests with coverage (comprehensive CI)
-make test-fast               # Run tests without coverage
-make test-db                 # Run database tests only (fast CI)
+make test-db                  # Run database tests only (fast CI)
 ```
 
 ### CI/CD Strategy
@@ -69,10 +68,8 @@ make cleanup-branches        # Clean merged branches
 ```
 
 ### Running the Bot
-```bash
 make run                     # Run bot locally
-python run.py               # Alternative run command
-```
+python main.py               # Alternative run command
 
 ## Build System
 - **Makefile** - Primary build automation

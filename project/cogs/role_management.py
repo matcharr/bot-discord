@@ -5,9 +5,9 @@ from discord.ext import commands
 class RoleManagement(commands.Cog):
     @commands.command(name="create_role")
     @commands.has_permissions(manage_roles=True)
-    async def create_role(
-        self, ctx, name, color: discord.Color = discord.Color.default()
-    ):
+    async def create_role(self, ctx, name, color: discord.Color | None = None):
+        if color is None:
+            color = discord.Color.default()
         role = await ctx.guild.create_role(name=name, color=color)
         await ctx.send(f'Role "{role.name}" has been created.')
 
@@ -28,7 +28,7 @@ class RoleManagement(commands.Cog):
     async def remove_role(self, ctx, member: discord.Member, *, role: discord.Role):
         await member.remove_roles(role)
         await ctx.send(
-            f'{member.mention} has been removed from the "{role.name}" role.'
+            f'{member.mention} has been removed from the "{role.name}" role.',
         )
 
 
