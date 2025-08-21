@@ -18,6 +18,7 @@ from sqlalchemy.orm import relationship, validates
 from .connection import Base
 from .security import security_manager
 
+
 logger = logging.getLogger(__name__)
 
 # Constants for validation

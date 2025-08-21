@@ -11,6 +11,7 @@ from .connection import get_db_session
 from .models import GDPRRequest, ModerationLog, SecureWarning
 from .security import security_manager
 
+
 logger = logging.getLogger(__name__)
 
 

@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+
 # Database URL from environment
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///warnings.db")
 engine_kwargs = {

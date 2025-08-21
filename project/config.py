@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from dotenv import find_dotenv, load_dotenv
 
+
 env_file = os.getenv("ENV_FILE")
 if env_file:
     load_dotenv(env_file, override=False)

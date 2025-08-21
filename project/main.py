@@ -12,6 +12,7 @@ from discord.ext import commands
 from utils.health import HealthChecker
 from utils.logger import setup_logger
 
+
 # Setup logging
 logger = setup_logger()
 

@@ -11,6 +11,7 @@ from .connection import init_database
 from .models import SecureWarning
 from .services import get_warning_service
 
+
 logger = logging.getLogger(__name__)
 
 
