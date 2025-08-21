@@ -25,3 +25,32 @@ ql:.env.example:postgresql-connection
 # Documentation examples with example keys
 ZGV2X3NhbHRfa2V5XzEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg=:docs/SETUP_NO_DOCKER.md:generic-api-key
 ZGV2X3BlcHBlcl9rZXlfMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3:docs/SETUP_NO_DOCKER.md:generic-api-key
+# Development environment secrets (safe to ignore)
+Mwtr6ai8tBB6cOmYN2Xts6FVBnYyl9A_z6-mE9n_3Pw=:.env.development:generic-api-key
+YHZbJGXTlfUqibRfr7VALmLikAZ3MSj6a_1k7pGyY0k=:.env.development:generic-api-key
+cUlfD5M1ykXbexXpxvJOT6E7bf2iUm9rTf31UeiK3sw=:.env.development:generic-api-key
+
+# Legacy project files (old tokens, safe to ignore)
+MTQwMzUyMTIzMzc2NDc0NTIxNw.GJZglH.YVdz1QJ2pv2nf3hz67g8oOg5NCuCME7h5HZ3dk:project/.env:generic-api-key
+MTEzNzMyNzY0MzMzMTY3MDAyNw.G9JtS0.yLGC4qe6hpwnb1y9Z69dh19dfUYnTCVyCt0Ft0:project/.env:generic-api-key
+MTEzNzMyNzY0MzMzMTY3MDAyNw.G9JtS0.yLGC4qe6hpwnb1y9Z69dh19dfUYnTCVyCt0Ft0:project/config.json:generic-api-key#
+ All development/example fingerprints to ignore
+5c0aab8cb3a2b265a18dede039ee02e3c61f8628:.env.development:postgresql-connection:9
+ee2fd21388103c1e5b68fa8f72eef2d5310129c6:.env.development:generic-api-key:8
+ee2fd21388103c1e5b68fa8f72eef2d5310129c6:.env.development:generic-api-key:9
+ee2fd21388103c1e5b68fa8f72eef2d5310129c6:.env.development:generic-api-key:10
+ee2fd21388103c1e5b68fa8f72eef2d5310129c6:.env.development:postgresql-connection:5
+ee2fd21388103c1e5b68fa8f72eef2d5310129c6:.env.test:discord-client-id:14
+ee2fd21388103c1e5b68fa8f72eef2d5310129c6:scripts/db-manage.sh:postgresql-connection:109
+189af46da0f2b5dbecd74ed212482cbeb51b48f9:docs/SETUP_NO_DOCKER.md:generic-api-key:59
+189af46da0f2b5dbecd74ed212482cbeb51b48f9:docs/SETUP_NO_DOCKER.md:generic-api-key:60
+189af46da0f2b5dbecd74ed212482cbeb51b48f9:docs/SETUP_NO_DOCKER.md:postgresql-connection:55
+189af46da0f2b5dbecd74ed212482cbeb51b48f9:docs/SETUP_NO_DOCKER.md:postgresql-connection:88
+189af46da0f2b5dbecd74ed212482cbeb51b48f9:docs/DATABASE.md:postgresql-connection:16
+189af46da0f2b5dbecd74ed212482cbeb51b48f9:docs/DATABASE.md:postgresql-connection:28
+189af46da0f2b5dbecd74ed212482cbeb51b48f9:docs/DATABASE.md:postgresql-connection:97
+996594ae7b4d51b8c5f48d76119e76dadf7e3aa6:.env.example:postgresql-connection:23
+189af46da0f2b5dbecd74ed212482cbeb51b48f9:docs/DATABASE.md:postgresql-connection:105
+c09a4583e9a430fbfb8b9e01d03b55f8fc7f499a:project/.env:generic-api-key:2
+be43bcf06c7634f08261f65c7ed3011d3133c6e4:project/.env:generic-api-key:1
+be43bcf06c7634f08261f65c7ed3011d3133c6e4:project/config.json:generic-api-key:2
