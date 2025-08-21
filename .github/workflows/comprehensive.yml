@@ -109,15 +109,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install yamllint dotenv-linter
 
-      - name: Install external validation tools
+      - name: Install shellcheck
         run: |
-          # Install shellcheck
-          sudo apt-get update && sudo apt-get install -y shellcheck
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
 
-          # Install markdownlint
+      - name: Install markdownlint
+        run: |
           npm install -g markdownlint-cli
 
-          # Install actionlint
+      - name: Install actionlint
+        run: |
           wget -q https://github.com/rhymond/actionlint/releases/download/v1.6.26/actionlint_1.6.26_linux_amd64.tar.gz
           tar -xzf actionlint_1.6.26_linux_amd64.tar.gz
           sudo mv actionlint /usr/local/bin/
