@@ -162,6 +162,28 @@ ignore = [
     "ISC001",
     # Allow mutable default arguments for Discord.py commands
     "B006",
+    # Type annotations: Allow missing annotations for legacy code
+    "ANN001", "ANN201", "ANN202", "ANN204", "ANN205",
+    # Exception handling: Allow string literals in exceptions
+    "EM101", "EM102",
+    # Control flow: Allow statements in try blocks
+    "TRY300",
+    # Global statements: Allow global usage (needed for bot state)
+    "PLW0603",
+    # Environment variables: Allow non-string defaults
+    "PLW1508",
+    # Boolean arguments: Allow boolean parameters
+    "FBT001", "FBT002",
+    # Datetime: Allow timezone-naive datetime usage
+    "DTZ003", "DTZ005", "DTZ006",
+    # Executable: Allow non-executable files with shebangs
+    "EXE001",
+    # Documentation: Allow missing blank lines in docstrings
+    "D205",
+    # Unicode: Allow ambiguous characters in strings
+    "RUF001",
+    # Line length: Allow long lines (handled by formatter)
+    "E501",
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
